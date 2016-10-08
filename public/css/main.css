@@ -1,0 +1,54 @@
+body {
+	background-color: #000;
+	font-family: "Helvetica Neue";
+	color: #fff;
+	padding: 0;
+	margin: 0;
+}
+#main_content {
+	padding-left: 10px;
+	font-size: 14px;
+	text-align: center;
+}
+.huge-font {
+	font-size: 48px;
+}
+.big-font {
+	font-size: 24px;
+}
+.pink {
+	color: #FF0089;
+}
+.green {
+	color: #00F0B5;
+}
+.fb-share-button {
+	margin-top: 28px;
+}
+.artist-details {
+	margin-top: 20px;
+}
+.start-time {
+	margin-top: 20px;
+	margin-bottom: 20px;
+}
+#main_content img{
+	margin-top: 20px;
+	margin-bottom: 20px;
+	width: 400px;
+	padding-left: 60px;
+	padding-right: 60px;
+}
+.top-banner {
+	background-color: #F2F2F2;
+	width: 100%;
+	padding-top: 8px;
+	padding-bottom: 8px;
+	text-align: center;
+	margin-top: 6px;
+}
+.top-banner a {
+	text-decoration: none;
+	color: #FF0089;
+	font-size: 16px;
+}

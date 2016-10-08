@@ -1,0 +1,87 @@
+<% GOOGLE_MAPS_API_KEY = "AIzaSyBttAWrVeVmuZIHmstcbNqffOB8NDfDqaw" %>
+<% event_title = @event["artist"]["name"] || @event["event"]["title"] %>
+<% address_lines = [
+	@event["venue"]["street_address"],
+	"#{@event["venue"]["city"]}, #{@event["venue"]["region_abbr"]} #{@event["venue"]["postal_code"]}",
+	@event["venue"]["neighborhood"],
+] %>
+<% google_maps_query = @event["venue"]["name"] + ", " + address_lines[0] + ", " + address_lines[1] %>
+<% formatted_start_time = Time.parse(@event["event"]["starts_at"]).strftime("%A %m/%d at %l:%M%p") %>
+<% genres_for_og = @event["artist"]["genres"].map{ |g| "#" + g }.join(' ').downcase %>
+<% genres = @event["artist"]["genres"].join(',').upcase %>
+<% url = "http://#{settings.domain}/s/#{@event["event"]["id"]}" %>
+<% image = "http://#{settings.domain}/images/venues/8x10Outside.jpg" %>
+
+<% og_article_title = "#{event_title} - #{formatted_start_time}" %>
+<% og_article_description = "@#{@event["venue"]["name"]} /// #{genres_for_og} /// Download the TinyShow iPhone app to listen to the band and explore more shows." %>
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title><%= event_title %></title>
+
+	<link rel="stylesheet" type="text/css" href="/css/main.css">
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+
+	<meta charset="UTF-8">
+	<meta property="og:url" content="<%= url %>" />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content="<%= og_article_title %>" />
+	<meta property="og:description" content="<%= og_article_description %>" />
+	<meta property="og:image" content="<%= image %>" />
+</head>
+<body>
+	<div class="top-banner">
+		<a href="#">
+			Listen to the band &amp; explore more shows with the free TinyShow iPhone app &raquo;
+		</a>
+	</div>
+
+	<div id="main_content">
+		<div class="fb-share-button" 
+			data-href="<%= url %>"
+			data-layout="button"
+			size="large">
+		</div>
+
+		<div class="artist-details">
+			<div class="huge-font"><%= event_title %></div>
+			<div
+				class="big-font"
+				style="margin-top: 6px;">
+				@<%= @event["venue"]["name"] %>
+			</div>
+			<div class="big-font green" style="margin-top: 2px;"><%= genres %></div>
+		</div>
+
+		<div class="big-font start-time" style="">
+			<i class="fa fa-arrow-right" aria-hidden="true"></i>
+			<%= formatted_start_time %>
+			<i class="fa fa-arrow-left" aria-hidden="true"></i>
+		</div>
+
+		<iframe
+		  width="400"
+		  height="300"
+		  frameborder="0"
+		  style="border:0"
+		  src="https://www.google.com/maps/embed/v1/place?key=<%= GOOGLE_MAPS_API_KEY %>&amp;q=<%= google_maps_query %>"
+		  allowfullscreen>
+		</iframe>
+
+		<div>
+			<img src="<%= image %>" />
+		</div>
+	</div>
+
+	<!-- Load Facebook SDK for JavaScript -->
+	<div id="fb-root"></div>
+	<script>(function(d, s, id) {
+	  var js, fjs = d.getElementsByTagName(s)[0];
+	  if (d.getElementById(id)) return;
+	  js = d.createElement(s); js.id = id;
+	  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5";
+	  fjs.parentNode.insertBefore(js, fjs);
+	}(document, 'script', 'facebook-jssdk'));</script>
+</body>
+</html>
