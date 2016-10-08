@@ -12,8 +12,12 @@
 <% url = "http://#{settings.domain}/s/#{@event["event"]["id"]}" %>
 <% image = "http://#{settings.domain}/images/venues/8x10Outside.jpg" %>
 
-<% og_article_title = "#{event_title} - #{formatted_start_time}" %>
-<% og_article_description = "@#{@event["venue"]["name"]} /// #{genres_for_og} /// Download the TinyShow iPhone app to listen to the band and explore more shows." %>
+<% og_article_title = "#{event_title} @#{@event["venue"]["name"]} - #{formatted_start_time}" %>
+<% og_article_description = [
+	genres_for_og,
+	@event["venue"]["neighborhood"] || @event["venue"]["city"],
+	"Download the TinyShow iPhone app to listen to the band and explore more shows.",
+].join(" /// ") %>
 
 <!DOCTYPE html>
 <html>
