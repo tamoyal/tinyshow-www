@@ -19,7 +19,9 @@ class EnvironmentManager
 		if env == "development"
 			get_open_ngrok_domain || raise("Start ngrok to use this server in development mode.")
 		else
-			"www.tinyshow.com"
+			"tinyshow-www.herokuapp.com"
+			# Coming soon:
+			#"www.tinyshow.com"
 		end
 	end
 
