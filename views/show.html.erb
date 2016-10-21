@@ -10,7 +10,7 @@
 <% genres_for_og = @event["artist"]["genres"].map{ |g| "#" + g }.join(' ').downcase %>
 <% genres = @event["artist"]["genres"].join(',').upcase %>
 <% url = "http://#{settings.domain}/s/#{@event["event"]["id"]}" %>
-<% image = "http://#{settings.domain}/images/venues/8x10Outside.jpg" %>
+<% image = @event["venue"]["grayscale_image_url"] %>
 
 <% og_article_title = "#{event_title} @#{@event["venue"]["name"]} - #{formatted_start_time}" %>
 <% og_article_description = [

@@ -1,23 +1,6 @@
 require 'json'
 require 'typhoeus'
 require 'uri'
-require 'fastimage'
-
-# Facebook OG wants us to give them the size of the image
-# Otherwise they will have to async process it so the image
-# may not be available at the first share.
-# See more here: https://developers.facebook.com/docs/sharing/best-practices/#precaching
-# If we decide on a standard size for venue images, we can remove this code
-class VenueImageSizeCache
-	def self.get_size(venue_id)
-		@data ||= {}
-		@data[venue_id] || calc_size(venue_id)
-	end
-
-	def self.calc_size(venue_id)
-		@data[venue_id] = FastImage.size("./public/images/venues/8x10Outside.jpg")
-	end
-end
 
 class TinyShowAPI
 	def show(id)
@@ -65,10 +48,12 @@ end
 get '/s/:id' do
 	api = TinyShowAPI.new
 	@event = api.show(params[:id])
-	@venue_image_size = VenueImageSizeCache.get_size(@event["venue"]["id"])
+	@venue_image_size = @event["venue"]["image_dimensions"].split("x").map(&:to_i)
 	erb :show
 end
 
 get '/local_data' do
-	File.read('./public/data/BALTIMORE-09-21-2016-READY.json')
+	# for simulating a bad connection
+	# sleep 10
+	File.read('./public/data/BALTIMORE-10-15-2016-READY.json')
 end
