@@ -39,9 +39,20 @@ Tilt.register Tilt::ERBTemplate, 'html.erb'
 
 configure do
 	set :domain, EnvironmentManager.get_domain_for_dev_env(ENV['RACK_ENV'])
+	# TODO: change this to the actual link
+	set :iphone_app_store_link, "/dl"
 end
 
 get '/' do
+	erb :welcome
+end
+
+get '/dl' do
+	# TODO: forward to the iTunes download page
+	erb :welcome
+end
+
+get '/login' do
 	erb :login
 end
 
@@ -55,5 +66,5 @@ end
 get '/local_data' do
 	# for simulating a bad connection
 	# sleep 10
-	File.read('./public/data/BALTIMORE-10-15-2016-READY.json')
+	File.read('./public/data/BALTIMORE-10-23-2016-READY.json')
 end
