@@ -52,9 +52,9 @@ get '/dl' do
 	erb :welcome
 end
 
-get '/login' do
-	erb :login
-end
+# get '/login' do
+# 	erb :login
+# end
 
 get '/s/:id' do
 	api = TinyShowAPI.new
