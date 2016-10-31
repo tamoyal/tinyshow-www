@@ -10,7 +10,7 @@ class TinyShowAPI
 	private
 
 	def data
-		@@data ||= JSON.parse(Typhoeus.get("https://s3.amazonaws.com/tinyshow-data/data.json").body)
+		@@data ||= JSON.parse(Typhoeus.get("https://s3.amazonaws.com/tinyshow-data/data.json", accept_encoding: "gzip").body)
 	end
 end
 
