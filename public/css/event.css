@@ -1,7 +1,7 @@
 body {
-	background-color: #000;
-	font-family: "Helvetica Neue";
-	color: #fff;
+	background: #111;
+	font-family: Helvetica, Arial, sans-serif;
+	color: #eee;
 	padding: 0;
 	margin: 0;
 }
