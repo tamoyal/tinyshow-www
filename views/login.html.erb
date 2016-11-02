@@ -4,21 +4,42 @@
   <title>TinyShow for Creators</title>
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="/css/connect.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script type="text/javascript" src="/js/tinyshow.js"></script>
 </head>
 <body>
-<script type="text/javascript" src="/js/tinyshow.js"></script>
 <script type="text/javascript">
   var currentFacebookUser = null;
 
+  $(function() {
+    $('#confirmForm').on('submit', function(e) {
+      e.preventDefault();
+      var formData = $("#confirmForm :input").serializeArray();
+
+      var selectedPages = [];
+      for (var i=0; i<formData.length; i++) {
+        if (formData[i].name == "facebookPages") {
+          for (var j=0; j<currentFacebookUser.pages.length; j++) {
+            if (currentFacebookUser.pages[j].id == formData[i].value) {
+              selectedPages.push(currentFacebookUser.pages[j].originalPayload);
+            }
+          }
+        }
+      }
+      var data = {
+        formData: formData,
+        user: currentFacebookUser.originalPayload,
+        selectedPages: selectedPages
+      };
+      console.log(data);
+    });
+  });
+
   // This is called with the results from from FB.getLoginStatus().
   function statusChangeCallback(response) {
-    // The response object is returned with a status field that lets the
-    // app know the current login status of the person.
-    // Full docs on the response object can be found in the documentation
-    // for FB.getLoginStatus().
     if (response.status === 'connected') {
       // Logged into your app and Facebook.
-      testAPI();
+      loggedIn();
     } else if (response.status === 'not_authorized') {
       // The person is logged into Facebook, but not your app.
       console.log("not_authorized");
@@ -73,96 +94,132 @@
     fjs.parentNode.insertBefore(js, fjs);
   }(document, 'script', 'facebook-jssdk'));
 
-  function getPagesList() {
-    FB.api('/me/accounts', function(response) {
-      var pages = response.data;
-      for (var i=0; i<pages.length; i++) {
-        var pageJSON = pages[i];
-        var page = new FacebookPage(pageJSON);
-        currentFacebookUser.pages.push(page);
-        setupUI();        
-      }
+  function loggedIn() {
+    TinyShowFacebookApi.getCurrentUserProfile(function(facebookUser) {
+      currentFacebookUser = facebookUser;
+      addUserProfileHTML(currentFacebookUser);
+      TinyShowFacebookApi.getPagesList(function(facebookPages){
+        currentFacebookUser.pages = facebookPages;
+        addPagesHTML(facebookPages);
+        prefillForm(currentFacebookUser);
+        showForm();
+      });
     });
   }
 
-  function setupUI() {
-    var html = [];
-    for (var i=0; i<currentFacebookUser.pages.length; i++) {
-      var page = currentFacebookUser.pages[i];
-      var pageListHtml = "<li>" +
-            "<div class=\"vCenter checkbox\">" +
-              "<label>" +
-                "<input value=\""+page.id+"\" type=\"checkbox\">" +
-                "<img src=\""+page.pictureUrl+"\" />" +
-                "<div style=\"display: inline;\">" + page.name + "</div>" +
-              "</label>" +
-            "</div>" +
-        "</li>";
-      html.push(pageListHtml);
-    }
-    document.getElementById("pageList").innerHTML = html.join("");
-    document.getElementById("firstName").value = currentFacebookUser.firstName;
-    document.getElementById("lastName").value = currentFacebookUser.lastName;
-    document.getElementById("email").value = currentFacebookUser.email;
+  function showForm() {
     document.getElementById("confirmationFormContainer").style.display = "block";
   }
 
-  // Here we run a very simple test of the Graph API after login is
-  // successful.  See statusChangeCallback() for when this call is made.
-  function testAPI() {
-	  FB.api('/me?fields=email,name,first_name,last_name', function(response) {
-      currentFacebookUser = new FacebookUser(response);
-      setLoggedInState();
-      getPagesList();
-	  });
+  function prefillForm(user) {
+    document.getElementById("firstName").value = currentFacebookUser.firstName;
+    document.getElementById("lastName").value = currentFacebookUser.lastName;
+    document.getElementById("email").value = currentFacebookUser.email;
   }
 
-  function setLoggedInState() {
+  function addPagesHTML(facebookPages) {
+    var html = [];
+    for (var i=0; i<facebookPages.length; i++) {
+      var page = facebookPages[i];
+      var pageListHtml = '<li>' +
+            '<div class="vCenter checkbox">' +
+              '<label>' +
+                '<input name="facebookPages" value="'+page.id+'" type="checkbox">' +
+                '<img src="'+page.pictureUrl+'" />' +
+                '<div style="display: inline;">' + page.name + '</div>' +
+              '</label>' +
+            '</div>' +
+        '</li>';
+      html.push(pageListHtml);
+    }
+    document.getElementById("pageList").innerHTML = html.join("");
+  }
+
+  function addUserProfileHTML(user) {
     document.getElementById("fbLogin").style.display = "none";
-    var html = "<img src=\""+currentFacebookUser.pictureUrl+"\" />" +
-      "<div class=\"logged-in-name\">Logged in as: <span class=\"blue\">"+currentFacebookUser.fullName+"</span></div>";
+    var html = '<img src="'+user.pictureUrl+'" />' +
+      '<div class="logged-in-name">' +
+        'Logged in as: <span class="blue">'+user.fullName+'</span>' +
+      '</div>';
     document.getElementById("loggedInUserSpot").innerHTML = html;
   }
 </script>
-  <div id="container">
-    <div id="title">TinyShow Connect</div>
-    <div id="slogan">Connect your <span class="blue">Facebook</span> events to the TinyShow App</div>
 
-    <div class="loginBox">
-      <div id="fbLogin">
-        LOGIN TO SELECT YOUR FACEBOOK PAGE:
-        <fb:login-button
-          data-size="large"
-          scope="public_profile,email,pages_show_list"
-          onlogin="checkLoginState();">
-        </fb:login-button>
-      </div>
-      <div id="loggedInUserSpot" class="pull-right">
-      </div>
-      <div class="spacer" style="clear: both;"></div>
-    </div>
-
-    <div id="confirmationFormContainer" style="display: none;">
-      <div class="confirm-title">Please confirm your information</div>
-      <form id="confirmForm">
-        <div class="form-group">
-          <label for="firstName">First Name</label>
-          <input type="text" class="form-control" id="firstName" placeholder="First Name">
-        </div>
-          <div class="form-group">
-          <label for="lastName">Last Name</label>
-          <input type="text" class="form-control" id="lastName" placeholder="Last Name">
-        </div>
-        <div class="form-group">
-          <label for="email">Email address</label>
-          <input type="email" class="form-control" id="email" placeholder="Email">
-        </div>
-        <label>Select which pages you'd like us to pull events from:</label>
-        <ul id="pageList"></ul>
-        <button type="submit" class="btn btn-default">Confirm</button>
-      </form>
-    </div>
+<div id="container">
+  <div id="title">TinyShow Connect</div>
+  <div id="slogan">
+    Connect your <span class="blue">Facebook</span> events to the TinyShow App
   </div>
+
+  <div class="loginBox">
+    <div id="fbLogin">
+      LOGIN TO SELECT YOUR FACEBOOK PAGE:
+      <fb:login-button
+        data-size="large"
+        scope="public_profile,email,pages_show_list,user_events,rsvp_event"
+        onlogin="checkLoginState();">
+      </fb:login-button>
+    </div>
+    <div id="loggedInUserSpot" class="pull-right"></div>
+    <div class="spacer" style="clear: both;"></div>
+  </div>
+
+  <div id="confirmationFormContainer" style="display: none;">
+    <div class="confirm-title">Please confirm your information</div>
+    <div>*We review every account so please ensure the email below is correct. Phone helps in case we have trouble reaching you via email.</div>
+    <form id="confirmForm">
+      <div class="form-group">
+        <label for="firstName">First Name</label>
+        <input
+          id="firstName"
+          name="firstName"
+          type="text"
+          class="form-control"
+          placeholder="First Name">
+      </div>
+      <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <input
+          id="lastName"
+          name="lastName"
+          type="text"
+          class="form-control"
+          placeholder="Last Name">
+      </div>
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          class="form-control"
+          placeholder="Email">
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        <input
+          id="phone"
+          name="phone"
+          type="phone"
+          class="form-control"
+          placeholder="Phone">
+      </div>
+      <label>Where should we pull events from?</label>
+      <div class="vCenter checkbox">
+        <label>
+          <input
+            name="pullEventsFromCurrentUser"
+            value="pullEventsFromCurrentUser"
+            type="checkbox">
+          <div style="display: inline;">Pull events from my user account</div>
+        </label>
+      </div>
+      <div>Select pages:</div>
+      <ul id="pageList"></ul>
+      <button type="submit" class="btn btn-default">Confirm</button>
+    </form>
+  </div>
+</div>
 
 </body>
 </html>
