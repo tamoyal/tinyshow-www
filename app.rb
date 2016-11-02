@@ -80,18 +80,20 @@ post '/users' do
 	end
 end
 
-post 'hooks/user_events' do
-	halt 400 unless params["hub"]["verify_token"] == "16abd4f9-3b72-4b09-b452-8a47b952bffe"
-	ap params
-	200
-end
+# Webhooks - Let's worry about this later
 
-get 'hooks/user_events' do
-	halt 400 unless params["hub"]["verify_token"] == "16abd4f9-3b72-4b09-b452-8a47b952bffe"
-	ap params
-	status_code 200
-	params["hub"]["challenge"]
-end
+# post 'hooks/user_events' do
+# 	halt 400 unless params["hub"]["verify_token"] == "16abd4f9-3b72-4b09-b452-8a47b952bffe"
+# 	ap params
+# 	200
+# end
+
+# get 'hooks/user_events' do
+# 	halt 400 unless params["hub"]["verify_token"] == "16abd4f9-3b72-4b09-b452-8a47b952bffe"
+# 	ap params
+# 	status_code 200
+# 	params["hub"]["challenge"]
+# end
 
 # Admin routes, for debugging
 # https://developers.facebook.com/docs/graph-api/reference/event
