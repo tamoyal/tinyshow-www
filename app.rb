@@ -11,12 +11,26 @@ require 'sinatra/activerecord'
 require 'awesome_print'
 require 'app/models/user'
 require 'app/models/user_facebook_page'
+require 'koala'
 
 Tilt.register Tilt::ERBTemplate, 'html.erb'
+
+Koala::Utils.level = Logger::DEBUG
 
 configure do
 	set :domain, Host.get
 	set :iphone_app_store_link, "/dl" # TODO: change this to the actual link
+end
+
+before do
+  content_type :json
+end
+
+helpers do
+  def respond(code, body)
+    status_code code
+    body.to_json
+  end
 end
 
 get '/' do
@@ -25,10 +39,6 @@ end
 
 get '/dl' do
 	erb :welcome # TODO: forward to the iTunes download page
-end
-
-get '/creators' do
-	erb :login
 end
 
 get '/s/:id' do
@@ -42,11 +52,14 @@ get '/local_data' do
 	File.read('./public/data/BALTIMORE-10-23-2016-READY.json')
 end
 
+get '/creators' do
+	erb :login
+end
+
 post '/users' do
 	u = User.find_by_email(params["user"]["email"])
 	if u
-		status 422
-		{error: "User already exists"}.to_json
+		respond(422, {error: "User already exists"})
 	else
 		u = User.new(params["user"])
 
@@ -63,11 +76,32 @@ post '/users' do
 		end
 
 		if u.save
-			status 201
-			{}.to_json
+			respond(201, {})
 		else
-			status 422
-			u.errors.to_json
+			respond(422, u.errors)
 		end
 	end
+end
+
+post 'hooks/user_events' do
+	halt 404 unless params[:verify_token] == "16abd4f9-3b72-4b09-b452-8a47b952bffe"
+	ap params
+	200
+end
+
+# Admin routes, for debugging
+# https://developers.facebook.com/docs/graph-api/reference/event
+
+get '/users/:id/facebook_events' do
+	user = User.find(params[:id])
+	graph = Koala::Facebook::API.new(user.facebook_access_token)
+	events = graph.get_connections("me", "events")
+	respond(200, events)
+end
+
+get '/pages/:id/facebook_events' do
+	page = UserFacebookPage.find(params[:id])
+	graph = Koala::Facebook::API.new(page.access_token)
+	events = graph.get_connections(page.page_id, "events")
+	respond(200, events)
 end
