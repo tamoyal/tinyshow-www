@@ -3,3 +3,5 @@ public/data
 .DS_Store
 .ruby-version
 .rbenv-gemsets
+config/database.yml
+

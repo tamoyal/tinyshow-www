@@ -6,32 +6,25 @@
   <link rel="stylesheet" type="text/css" href="/css/connect.css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
   <script type="text/javascript" src="/js/tinyshow.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js"></script>
 </head>
 <body>
 <script type="text/javascript">
-  var currentFacebookUser = null;
-
   $(function() {
     $('#confirmForm').on('submit', function(e) {
       e.preventDefault();
-      var formData = $("#confirmForm :input").serializeArray();
-
-      var selectedPages = [];
-      for (var i=0; i<formData.length; i++) {
-        if (formData[i].name == "facebookPages") {
-          for (var j=0; j<currentFacebookUser.pages.length; j++) {
-            if (currentFacebookUser.pages[j].id == formData[i].value) {
-              selectedPages.push(currentFacebookUser.pages[j].originalPayload);
-            }
-          }
+      $.ajax({
+        url: $(this).attr('action'),
+        data: $(this).serialize(),
+        type: "POST",
+        dataType: "json",
+        success: function(response) {
+          console.log(response);
+        },
+        error: function(xhr, textStatus, errorThrown) {
+          console.log(errorThrown);
         }
-      }
-      var data = {
-        formData: formData,
-        user: currentFacebookUser.originalPayload,
-        selectedPages: selectedPages
-      };
-      console.log(data);
+      });
     });
   });
 
@@ -96,52 +89,62 @@
 
   function loggedIn() {
     TinyShowFacebookApi.getCurrentUserProfile(function(facebookUser) {
-      currentFacebookUser = facebookUser;
-      addUserProfileHTML(currentFacebookUser);
+      addUserProfileHTML(facebookUser);
       TinyShowFacebookApi.getPagesList(function(facebookPages){
-        currentFacebookUser.pages = facebookPages;
+        facebookUser.pages = facebookPages;
         addPagesHTML(facebookPages);
-        prefillForm(currentFacebookUser);
-        showForm();
+        prefillForm(facebookUser);
+        $("#confirmationFormContainer").show();
       });
     });
   }
 
-  function showForm() {
-    document.getElementById("confirmationFormContainer").style.display = "block";
-  }
-
   function prefillForm(user) {
-    document.getElementById("firstName").value = currentFacebookUser.firstName;
-    document.getElementById("lastName").value = currentFacebookUser.lastName;
-    document.getElementById("email").value = currentFacebookUser.email;
+    $("#firstName").val(user.firstName);
+    $("#lastName").val(user.lastName);
+    $("#email").val(user.email);
+
+    var facebookUserInputs = Mustache.render('\
+      <input\
+        type="hidden"\
+        name="user[facebook_graph_payload]"\
+        value="{{originalPayloadJSON}}">\
+      <input\
+        type="hidden"\
+        name="user[facebook_access_token]"\
+        value="{{accessToken}}">', user);
+    $("#confirmForm").append(facebookUserInputs);
   }
 
   function addPagesHTML(facebookPages) {
-    var html = [];
+    var pieces = [];
     for (var i=0; i<facebookPages.length; i++) {
-      var page = facebookPages[i];
-      var pageListHtml = '<li>' +
-            '<div class="vCenter checkbox">' +
-              '<label>' +
-                '<input name="facebookPages" value="'+page.id+'" type="checkbox">' +
-                '<img src="'+page.pictureUrl+'" />' +
-                '<div style="display: inline;">' + page.name + '</div>' +
-              '</label>' +
-            '</div>' +
-        '</li>';
-      html.push(pageListHtml);
+      var html = Mustache.render('\
+        <li>\
+          <div class="vCenter checkbox">\
+            <label>\
+              <input\
+                name="facebookPages[{{id}}]"\
+                value="{{originalPayloadJSON}}"\
+                type="checkbox">\
+              <img src="{{pictureUrl}}" />\
+              <div style="display: inline;">{{page.name}}</div>\
+            </label>\
+          </div>\
+        </li>', facebookPages[i]);
+      pieces.push(html);
     }
-    document.getElementById("pageList").innerHTML = html.join("");
+    $("#pageList").html(pieces.join(""));
   }
 
   function addUserProfileHTML(user) {
-    document.getElementById("fbLogin").style.display = "none";
-    var html = '<img src="'+user.pictureUrl+'" />' +
-      '<div class="logged-in-name">' +
-        'Logged in as: <span class="blue">'+user.fullName+'</span>' +
-      '</div>';
-    document.getElementById("loggedInUserSpot").innerHTML = html;
+    $("#fbLogin").hide();
+    var html = Mustache.render('\
+      <img src="{{pictureUrl}}" />\
+      <div class="logged-in-name">\
+        Logged in as: <span class="blue">{{fullName}}</span>\
+      </div>', user);
+    $("#loggedInUserSpot").html(html);
   }
 </script>
 
@@ -166,13 +169,15 @@
 
   <div id="confirmationFormContainer" style="display: none;">
     <div class="confirm-title">Please confirm your information</div>
-    <div>*We review every account so please ensure the email below is correct. Phone helps in case we have trouble reaching you via email.</div>
-    <form id="confirmForm">
+    <div>
+      *We review every account so please ensure the email below is correct. Phone helps in case we have trouble reaching you via email.
+    </div>
+    <form id="confirmForm" action="/users" method="POST">
       <div class="form-group">
         <label for="firstName">First Name</label>
         <input
           id="firstName"
-          name="firstName"
+          name="user[first_name]"
           type="text"
           class="form-control"
           placeholder="First Name">
@@ -181,7 +186,7 @@
         <label for="lastName">Last Name</label>
         <input
           id="lastName"
-          name="lastName"
+          name="user[last_name]"
           type="text"
           class="form-control"
           placeholder="Last Name">
@@ -190,7 +195,7 @@
         <label for="email">Email address</label>
         <input
           id="email"
-          name="email"
+          name="user[email]"
           type="email"
           class="form-control"
           placeholder="Email">
@@ -199,7 +204,7 @@
         <label for="phone">Phone</label>
         <input
           id="phone"
-          name="phone"
+          name="user[phone]"
           type="phone"
           class="form-control"
           placeholder="Phone">
@@ -208,8 +213,8 @@
       <div class="vCenter checkbox">
         <label>
           <input
-            name="pullEventsFromCurrentUser"
-            value="pullEventsFromCurrentUser"
+            name="user[get_events_from_user_fb_account]"
+            value="true"
             type="checkbox">
           <div style="display: inline;">Pull events from my user account</div>
         </label>

@@ -1,23 +1,13 @@
 <% GOOGLE_MAPS_API_KEY = "AIzaSyBttAWrVeVmuZIHmstcbNqffOB8NDfDqaw" %>
 <% event_title = @event["artist"]["name"] || @event["event"]["title"] %>
+<% v = @event["venue"] %>
 <% address_lines = [
-	@event["venue"]["street_address"],
-	"#{@event["venue"]["city"]}, #{@event["venue"]["region_abbr"]} #{@event["venue"]["postal_code"]}",
-	@event["venue"]["neighborhood"],
+	v["street_address"],
+	"#{v["city"]}, #{v["region_abbr"]} #{v["postal_code"]}",
+	v["neighborhood"],
 ] %>
-<% google_maps_query = @event["venue"]["name"] + ", " + address_lines[0] + ", " + address_lines[1] %>
+<% google_maps_query = v["name"] + ", " + address_lines[0] + ", " + address_lines[1] %>
 <% formatted_start_time = Time.parse(@event["event"]["starts_at"]).strftime("%A %m/%d at %l:%M%p") %>
-<% genres_for_og = @event["artist"]["genres"].map{ |g| "#" + g }.join(' ').downcase %>
-<% genres = @event["artist"]["genres"].join(',').upcase %>
-<% url = "http://#{settings.domain}/s/#{@event["event"]["id"]}" %>
-<% image = @event["venue"]["grayscale_image_url"] %>
-
-<% og_article_title = "#{event_title} @#{@event["venue"]["name"]} - #{formatted_start_time}" %>
-<% og_article_description = [
-	genres_for_og,
-	@event["venue"]["neighborhood"] || @event["venue"]["city"],
-	"Download the TinyShow iPhone app to listen to the band and explore more shows.",
-].join(" /// ") %>
 
 <!DOCTYPE html>
 <html>
@@ -28,13 +18,13 @@
 	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
 
 	<meta charset="UTF-8">
-	<meta property="og:url" content="<%= url %>" />
+	<meta property="og:url" content="<%= @og.url %>" />
 	<meta property="og:type" content="article" />
-	<meta property="og:title" content="<%= og_article_title %>" />
-	<meta property="og:description" content="<%= og_article_description %>" />
-	<meta property="og:image" content="<%= image %>" />
-	<meta property="og:image:width" content="<%= @venue_image_size[0] %>" />
-	<meta property="og:image:height" content="<%= @venue_image_size[1] %>" />
+	<meta property="og:title" content="<%= @og.title %>" />
+	<meta property="og:description" content="<%= @og.description %>" />
+	<meta property="og:image" content="<%= @og.image %>" />
+	<meta property="og:image:width" content="<%= @og.image_width %>" />
+	<meta property="og:image:height" content="<%= @og.image_height %>" />
 </head>
 <body>
 	<div class="top-banner">
@@ -45,7 +35,7 @@
 
 	<div id="main_content">
 		<div class="fb-share-button" 
-			data-href="<%= url %>"
+			data-href="<%= @og.url %>"
 			data-layout="button"
 			size="large">
 		</div>
@@ -55,9 +45,11 @@
 			<div
 				class="big-font"
 				style="margin-top: 6px;">
-				@<%= @event["venue"]["name"] %>
+				@<%= v["name"] %>
 			</div>
-			<div class="big-font green" style="margin-top: 2px;"><%= genres %></div>
+			<div class="big-font green" style="margin-top: 2px;">
+				<%= @event["artist"]["genres"].join(',').upcase %>
+			</div>
 		</div>
 
 		<div class="big-font start-time" style="">
@@ -76,7 +68,7 @@
 		</iframe>
 
 		<div>
-			<img src="<%= image %>" />
+			<img src="<%= @og.image %>" />
 		</div>
 	</div>
 

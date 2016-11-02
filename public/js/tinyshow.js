@@ -1,4 +1,4 @@
-var FacebookUser = function(json) {
+var FacebookUser = function(json, accessToken) {
   this.id = json.id;
   this.fullName = json.name;
   this.firstName = json.first_name;
@@ -6,7 +6,11 @@ var FacebookUser = function(json) {
   this.email = json.email;
   this.pages = [];
   this.pictureUrl = "http://graph.facebook.com/" + json.id + "/picture?type=square";
+  this.accessToken = accessToken;
   this.originalPayload = json;
+  this.originalPayloadJSON = function() {
+    return JSON.stringify(this.originalPayload);
+  }
 };
 
 var FacebookPage = function(json) {
@@ -16,6 +20,9 @@ var FacebookPage = function(json) {
   this.perms = json.perms;
   this.pictureUrl = "http://graph.facebook.com/" + json.id + "/picture?type=square";
   this.originalPayload = json;
+  this.originalPayloadJSON = function() {
+    return JSON.stringify(this.originalPayload);
+  }
 };
 
 var FACEBOOK_USER_FIELDS = [
@@ -47,7 +54,7 @@ var TinyShowFacebookApi = {
   },
   getCurrentUserProfile: function(success) {
     FB.api('/me?fields='+FACEBOOK_USER_FIELDS.join(","), function(response) {
-      success(FacebookUser(response));
+      success(new FacebookUser(response, FB.getAuthResponse()['accessToken']));
     });
   }
 }
