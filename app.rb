@@ -22,12 +22,9 @@ configure do
 	set :iphone_app_store_link, "/dl" # TODO: change this to the actual link
 end
 
-before do
-  content_type :json
-end
-
 helpers do
   def respond(code, body)
+  	content_type :json
     status_code code
     body.to_json
   end
@@ -84,9 +81,16 @@ post '/users' do
 end
 
 post 'hooks/user_events' do
-	halt 404 unless params[:verify_token] == "16abd4f9-3b72-4b09-b452-8a47b952bffe"
+	halt 400 unless params["hub"]["verify_token"] == "16abd4f9-3b72-4b09-b452-8a47b952bffe"
 	ap params
 	200
+end
+
+get 'hooks/user_events' do
+	halt 400 unless params["hub"]["verify_token"] == "16abd4f9-3b72-4b09-b452-8a47b952bffe"
+	ap params
+	status_code 200
+	params["hub"]["challenge"]
 end
 
 # Admin routes, for debugging
