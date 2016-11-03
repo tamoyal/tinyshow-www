@@ -7,10 +7,10 @@ div#slogan {
   margin-top: 0px;
   font-size: 20px;
 }
-ul#pageList {
+ul.pageList {
   list-style: none;
 }
-ul#pageList img{
+ul.pageList img{
   margin-left: 6px;
   margin-right: 6px;
   width: 48px;

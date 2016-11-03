@@ -53,6 +53,19 @@ get '/creators' do
 	erb :login
 end
 
+get '/existing_user' do
+	u = User.where(facebook_id: params["facebookId"]).includes(:facebook_pages)
+	ap u
+	if u.first
+		# TODO: User exists so extend their access token
+		content_type :json
+    status_code 200
+    u.first.to_json(:include => [:facebook_pages])
+	else
+		respond(200, {})
+	end
+end
+
 post '/users' do
 	u = User.find_by_email(params["user"]["email"])
 	if u
@@ -105,9 +118,45 @@ get '/users/:id/facebook_events' do
 	respond(200, events)
 end
 
+# NOTE: We could store the expiration time and check that
+# ...but we'd probably have to handle the error anyway
+# ...so should we bother having multiple types of checks?
+# ...or just wait for the expiration exception? (this for now)
 get '/pages/:id/facebook_events' do
 	page = UserFacebookPage.find(params[:id])
-	graph = Koala::Facebook::API.new(page.access_token)
-	events = graph.get_connections(page.page_id, "events")
+
+	events = nil
+	begin
+		graph = Koala::Facebook::API.new(page.access_token)
+		events = graph.get_connections(page.page_id, "events")
+	rescue Koala::Facebook::APIError => e
+		puts "Koala::Facebook::APIError:"
+		ap e
+		if refresh_token_for_page(graph, page)
+			events = graph.get_connections(page.page_id, "events")
+		else
+			respond(422, {})
+		end
+	end
 	respond(200, events)
+end
+
+# Important: While it took an hour of reading docs to find this out, it turns out
+# this is not for refreshing expired tokens. So you have to call this before the
+# token expires or users will have to re-login.
+def refresh_token_for_page(graph, page)
+	puts "Refreshing access token for #{page}"
+	oauth = Koala::Facebook::OAuth.new("847945558672954", "5bb6bcff0a70da76f9820c6d243720bc")
+	ap oauth
+	new_access_info = oauth.exchange_access_token_info(page.access_token)
+	puts "Received new access info:"
+	ap new_access_info
+	new_access_token = new_access_info["access_token"]
+	if new_access_token
+		page.access_token = new_access_token
+		page.save!
+		true
+	else
+		false
+	end
 end

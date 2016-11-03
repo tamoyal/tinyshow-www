@@ -1,3 +1,8 @@
+var TinyShowUser = function(json) {
+  this.fullName = json.first_name;
+  this.pictureUrl = "http://graph.facebook.com/" + json.facebook_id + "/picture?type=square";
+}
+
 var FacebookUser = function(json, accessToken) {
   this.id = json.id;
   this.fullName = json.name;
@@ -40,15 +45,30 @@ var FACEBOOK_USER_FIELDS = [
   "relationship_status",
 ];
 
+var TinyShowApi = {
+  getExistingUser: function(onSuccess) {
+    var auth = FB.getAuthResponse();
+    $.ajax({
+      url: "/existing_user",
+      data: {facebookId: auth["userID"], accessToken: auth["accessToken"]},
+      type: "GET",
+      dataType: "json",
+      success: function(user) {
+        onSuccess(user);
+      },
+      error: function(xhr, textStatus, errorThrown) {
+        console.log(errorThrown);
+      }
+    });
+  }
+}
+
 var TinyShowFacebookApi = {
   getPagesList: function(success) {    
     FB.api('/me/accounts', function(response) {
-      var facebookPages = [];
-      var pages = response.data;
-      for (var i=0; i<pages.length; i++) {
-        var pageJSON = pages[i];
-        facebookPages.push(new FacebookPage(pageJSON));
-      }
+      var facebookPages = _.map(response.data, function(pageJSON) {
+        return new FacebookPage(pageJSON);
+      });
       success(facebookPages);
     });
   },
