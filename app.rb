@@ -1,8 +1,7 @@
 $:.unshift File.dirname(__FILE__)
 
 require 'config/host'
-require 'lib/tinyshow/api'
-require 'lib/tinyshow/og_meta'
+require 'lib/tinyshow'
 require 'json'
 require 'typhoeus'
 require 'uri'
@@ -50,6 +49,14 @@ get '/local_data' do
 end
 
 get '/creators' do
+	@required_creator_permissions = [
+		"public_profile",
+		"email",
+		"pages_show_list",
+		"manage_pages",
+		"user_events",
+		"rsvp_event",
+	]
 	erb :login
 end
 
@@ -57,7 +64,6 @@ get '/existing_user' do
 	u = User.where(facebook_id: params["facebookId"]).includes(:facebook_pages)
 	ap u
 	if u.first
-		# TODO: User exists so extend their access token
 		content_type :json
     status_code 200
     u.first.to_json(:include => [:facebook_pages])
@@ -73,16 +79,27 @@ post '/users' do
 	else
 		u = User.new(params["user"])
 
+		refreshed_token = refresh_token(u.facebook_access_token)
+		TinyShow.warn "Could not get long lived access token for user" if refreshed_token.nil?
+		u.facebook_access_token = refreshed_token
+
 		user_fb_payload = JSON.parse(params["user"]["facebook_graph_payload"])
 		u.facebook_id = user_fb_payload["id"]
 
-		params["facebookPages"].each do |facebook_id, json|
-			facebook_page = JSON.parse(json)
-			u.facebook_pages.build({
-				page_id: facebook_page["id"],
-				access_token: facebook_page["access_token"],
-				graph_payload: json,
-			})
+		if params["facebookPages"]
+			params["facebookPages"].each do |facebook_id, json|
+				facebook_page = JSON.parse(json)
+				u.facebook_pages.build({
+					facebook_id: facebook_page["id"],
+					facebook_access_token: facebook_page["access_token"],
+					graph_payload: json,
+				})
+				u.facebook_pages.each do |page|
+					refreshed_token = refresh_token(page.facebook_access_token)
+					TinyShow.warn "Could not get long lived access token for page" if refreshed_token.nil?
+					page.facebook_access_token = refreshed_token
+				end
+			end
 		end
 
 		if u.save
@@ -90,6 +107,21 @@ post '/users' do
 		else
 			respond(422, u.errors)
 		end
+	end
+end
+
+# Important: While it took an hour of reading docs to find this out, it turns out
+# this is not for refreshing expired tokens. So you have to call this before the
+# token expires or users will have to re-login.
+def refresh_token(token)
+	TinyShow.debug "Refreshing token"
+	oauth = Koala::Facebook::OAuth.new("847945558672954", "5bb6bcff0a70da76f9820c6d243720bc")
+	new_access_info = oauth.exchange_access_token_info(token)
+	TinyShow.debug new_access_info
+	if new_access_info["access_token"]
+		new_access_info["access_token"]
+	else
+		TinyShow.warn "Could not refresh access token"
 	end
 end
 
@@ -127,13 +159,16 @@ get '/pages/:id/facebook_events' do
 
 	events = nil
 	begin
-		graph = Koala::Facebook::API.new(page.access_token)
-		events = graph.get_connections(page.page_id, "events")
+		graph = Koala::Facebook::API.new(page.facebook_access_token)
+		events = graph.get_connections(page.facebook_id, "events")
 	rescue Koala::Facebook::APIError => e
 		puts "Koala::Facebook::APIError:"
 		ap e
-		if refresh_token_for_page(graph, page)
-			events = graph.get_connections(page.page_id, "events")
+
+		refreshed_token = refresh_token(page.facebook_access_token)
+		if refreshed_token
+			page.update_attribute(:facebook_access_token, refreshed_token)
+			events = graph.get_connections(page.facebook_id, "events")
 		else
 			respond(422, {})
 		end
@@ -141,22 +176,4 @@ get '/pages/:id/facebook_events' do
 	respond(200, events)
 end
 
-# Important: While it took an hour of reading docs to find this out, it turns out
-# this is not for refreshing expired tokens. So you have to call this before the
-# token expires or users will have to re-login.
-def refresh_token_for_page(graph, page)
-	puts "Refreshing access token for #{page}"
-	oauth = Koala::Facebook::OAuth.new("847945558672954", "5bb6bcff0a70da76f9820c6d243720bc")
-	ap oauth
-	new_access_info = oauth.exchange_access_token_info(page.access_token)
-	puts "Received new access info:"
-	ap new_access_info
-	new_access_token = new_access_info["access_token"]
-	if new_access_token
-		page.access_token = new_access_token
-		page.save!
-		true
-	else
-		false
-	end
-end
+

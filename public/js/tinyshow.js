@@ -1,6 +1,7 @@
 var TinyShowUser = function(json) {
   this.fullName = json.first_name;
   this.pictureUrl = "http://graph.facebook.com/" + json.facebook_id + "/picture?type=square";
+  this.facebook_pages = json.facebook_pages;
 }
 
 var FacebookUser = function(json, accessToken) {
@@ -76,5 +77,17 @@ var TinyShowFacebookApi = {
     FB.api('/me?fields='+FACEBOOK_USER_FIELDS.join(","), function(response) {
       success(new FacebookUser(response, FB.getAuthResponse()['accessToken']));
     });
-  }
+  },
+  getGrantedPermissions: function(success) {
+    FB.api('/me/permissions', function(response) {
+      var gantedPermissions = [];
+      _.each(response.data, function(permission) {
+        if (permission["status"] == "granted") {
+          gantedPermissions.push(permission["permission"]);
+        }
+      });
+      console.log(gantedPermissions);
+      success(gantedPermissions);
+    });
+  },
 }

@@ -16,13 +16,13 @@ ActiveRecord::Schema.define(version: 20161102053602) do
   enable_extension "plpgsql"
 
   create_table "user_facebook_pages", force: :cascade do |t|
-    t.string   "page_id"
-    t.string   "access_token"
+    t.string   "facebook_id"
+    t.string   "facebook_access_token"
     t.string   "graph_payload"
     t.integer  "user_id"
-    t.datetime "created_at",    null: false
-    t.datetime "updated_at",    null: false
-    t.index ["user_id", "page_id"], name: "index_user_facebook_pages_on_user_id_and_page_id", unique: true, using: :btree
+    t.datetime "created_at",            null: false
+    t.datetime "updated_at",            null: false
+    t.index ["user_id", "facebook_id"], name: "index_user_facebook_pages_on_user_id_and_facebook_id", unique: true, using: :btree
     t.index ["user_id"], name: "index_user_facebook_pages_on_user_id", using: :btree
   end
 

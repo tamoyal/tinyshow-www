@@ -4,10 +4,17 @@
   <title>TinyShow for Creators</title>
   <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <link rel="stylesheet" type="text/css" href="/css/connect.css">
+
+  <!-- Constants -->
+  <script type="text/javascript">
+    var REQUIRED_CREATOR_PERMISSIONS = <%= @required_creator_permissions %>;
+  </script>
+
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script type="text/javascript" src="/js/login.js"></script>
   <script type="text/javascript" src="/js/tinyshow.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.2.1/mustache.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 </head>
 <body>
 <script type="text/javascript">
@@ -88,30 +95,81 @@
     fjs.parentNode.insertBefore(js, fjs);
   }(document, 'script', 'facebook-jssdk'));
 
-  function loggedIn() {
+  function ensureRequiredPermissions(onGranted) {
+    TinyShowFacebookApi.getGrantedPermissions(function(gantedPermissions) {
+      var missingPermissions = _.filter(REQUIRED_CREATOR_PERMISSIONS,
+        function(requiredPermission) {
+          return gantedPermissions.indexOf(requiredPermission) < 0;
+        });
+
+      if (missingPermissions.length > 0) {
+        $("#missing_permissions").show();
+        var html = _.map(missingPermissions, function(p) {
+          return '<li>'+p+'</li>';
+        }).join("");
+        $("#permissions_list").append(html);
+
+        $("#do_grant").click(function(e){
+          e.preventDefault();
+          FB.login(function(response) {
+            onGranted();
+          },
+          {
+            scope: missingPermissions.join(','),
+            auth_type: 'rerequest'
+          });
+        });
+      } else {
+        onGranted();
+      }
+    });
+  }
+
+  function setupCurrentUserUI(onSetup) {
     TinyShowApi.getExistingUser(function(existingUser) {
       if (existingUser["id"]) {
-        addUserProfileHTML(new TinyShowUser(existingUser));
-        TinyShowFacebookApi.getPagesList(function(facebookPages) {
-          var selectedIds = _.map(existingUser["facebook_pages"], function(page) {
-            return page["page_id"];
-          });
-          var selectedPages = _.filter(facebookPages, function(page) {
-            return selectedIds.indexOf(page.id) >= 0;
-          });
-          addPagesHTML(selectedPages);
-        });
+        var u = new TinyShowUser(existingUser);
+        addUserProfileHTML(u);
+        onSetup(u);
       } else {
         TinyShowFacebookApi.getCurrentUserProfile(function(facebookUser) {
           addUserProfileHTML(facebookUser);
-          TinyShowFacebookApi.getPagesList(function(facebookPages){
-            facebookUser.pages = facebookPages;
-            addPagesFormHTML(facebookPages);
-            prefillForm(facebookUser);
-            $("#confirmationFormContainer").show();
-          });
+          onSetup(facebookUser);
         });
       }
+    });
+  }
+
+  function showPagesSettings(user) {
+    TinyShowFacebookApi.getPagesList(function(facebookPages) {
+      var selectedIds = _.map(user.facebook_pages, function(page) {
+        return page["facebook_id"];
+      });
+      var selectedPages = _.filter(facebookPages, function(page) {
+        return selectedIds.indexOf(page.id) >= 0;
+      });
+      addPagesHTML(selectedPages, user["get_events_from_user_fb_account"]);
+    });
+  }
+
+  function showPagesForm(user) {
+    TinyShowFacebookApi.getPagesList(function(facebookPages){
+      user.pages = facebookPages;
+      addPagesFormHTML(facebookPages);
+      prefillForm(user);
+      $("#confirmationFormContainer").show();
+    });
+  }
+
+  function loggedIn() {
+    setupCurrentUserUI(function(currentUser) {
+      ensureRequiredPermissions(function() {
+        if (currentUser instanceof TinyShowUser) {
+          showPagesSettings(currentUser);
+        } else {
+          showPagesForm(currentUser);
+        }
+      });
     });
   }
 
@@ -151,21 +209,28 @@
     $("#pageList").html(html);
   }
 
-  function addPagesHTML(facebookPages) {
-    var pieces = [
-      '<h4>Your Pages</h4>',
-      '<ul class="pageList">',
-    ];
-    _.each(facebookPages, function(page) {
-       pieces.push(Mustache.render('\
-        <li>\
-          <div class="vCenter">\
-            <img src="{{pictureUrl}}" />\
-            <div style="display: inline;">{{name}}</div>\
-          </div>\
-        </li>', page));
-    });
-    pieces.push("</ul>");
+  function addPagesHTML(facebookPages, getsEventsFromUser) {
+    var pieces = [];
+    if (facebookPages.length > 0) {
+      pieces.push('<h4>Your Pages</h4>');
+      pieces.push('<ul class="pageList">');
+      _.each(facebookPages, function(page) {
+         pieces.push(Mustache.render('\
+          <li>\
+            <div class="vCenter">\
+              <img src="{{pictureUrl}}" />\
+              <div style="display: inline;">{{name}}</div>\
+            </div>\
+          </li>', page));
+      });
+      pieces.push("</ul>");
+    } else {
+      pieces.push("<div>You have connected 0 Facebook pages for TinyShow to pull events from.</div>");
+    }
+
+    if (getsEventsFromUser) {
+      pieces.push("<div>Your user account is setup for TinyShow to pull events from.</div>");
+    }
     $("#userSettings").html(pieces.join(""));
   }
 
@@ -191,7 +256,7 @@
       LOGIN TO SELECT YOUR FACEBOOK PAGE:
       <fb:login-button
         data-size="large"
-        scope="public_profile,email,pages_show_list,user_events,rsvp_event"
+        scope="<%= @required_creator_permissions.join(',') %>"
         onlogin="checkLoginState();">
       </fb:login-button>
     </div>
@@ -200,6 +265,13 @@
   </div>
 
   <div id="userSettings">
+  </div>
+
+  <div style="display: none;" id="missing_permissions">
+    <div>You must grant the following permissions to connect your events to TinyShow:</div>
+    <ul id="permissions_list">
+    </ul>
+    <a id="do_grant" href="#">Grant &raquo;</a>
   </div>
 
   <div id="confirmationFormContainer" style="display: none;">

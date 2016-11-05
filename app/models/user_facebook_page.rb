@@ -1,5 +1,5 @@
 class UserFacebookPage < ActiveRecord::Base
 	belongs_to :user
 
-	validates_uniqueness_of :page_id, scope: :user_id
+	validates_uniqueness_of :facebook_id, scope: :user_id
 end
