@@ -4,4 +4,5 @@ public/data
 .ruby-version
 .rbenv-gemsets
 config/database.yml
-
+node_modules
+public/bundle.js
