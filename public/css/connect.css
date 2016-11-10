@@ -3,55 +3,6 @@ body {
   background: #111;
   color: #eee;
 }
-div#slogan {
-  margin-top: 0px;
-  font-size: 20px;
-}
-ul.pageList {
-  list-style: none;
-}
-ul.pageList img{
-  margin-left: 6px;
-  margin-right: 6px;
-  width: 48px;
-}
-div#container {
-  padding-top: 20px;
-  padding-left: 60px;
-  padding-bottom: 40px;
-  width: 600px;
-}
-div#title {
-  font-size: 40px;
-  font-weight: 200;
-}
-span.blue {
+.blue {
   color: #00A1E4;
 }
-div.loginBox {
-  border-top: 1px solid #eee;
-  border-bottom: 1px solid #eee;
-  padding-top: 16px;
-  padding-bottom: 16px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-div.logged-in-name {
-  font-size: 12px;
-}
-div.confirm-title {
-  text-transform: uppercase;
-  font-size: 20px;
-}
-form#confirmForm {
-  margin-top: 20px;
-}
-/*
-  IMPORTANT: REALLY WEIRD! Putting this CSS above other CSS screws up the page
-  by making the browser ignore other CSS. Must look into or post on SO.
-*/
-div.vCenter {
-  height: 54px;
-  display: flex;
-  align-items: center;
-}​

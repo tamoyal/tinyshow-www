@@ -1,8 +1,8 @@
 module.exports = {
-  entry: './views/Application.jsx',
+  entry: './app/react/Application.jsx',
   output: {
     path: __dirname,
-    filename: './public/bundle.js'
+    filename: './public/app.js'
   },
   resolve: {
     root: __dirname,
@@ -22,5 +22,5 @@ module.exports = {
         exclude: /(node_modules|bower_components)/
       }
     ]
-  }
+  },
 };

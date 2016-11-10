@@ -1,6 +1,6 @@
 var TinyShowUser = function(json) {
   this.fullName = json.first_name;
-  this.pictureUrl = "http://graph.facebook.com/" + json.facebook_id + "/picture?type=square";
+  this.pictureUrl = 'http://graph.facebook.com/' + json.facebook_id + '/picture?type=square';
   this.facebook_pages = json.facebook_pages;
 }
 
@@ -11,7 +11,7 @@ var FacebookUser = function(json, accessToken) {
   this.lastName = json.last_name;
   this.email = json.email;
   this.pages = [];
-  this.pictureUrl = "http://graph.facebook.com/" + json.id + "/picture?type=square";
+  this.pictureUrl = 'http://graph.facebook.com/' + json.id + '/picture?type=square';
   this.accessToken = accessToken;
   this.originalPayload = json;
   this.originalPayloadJSON = function() {
@@ -24,7 +24,7 @@ var FacebookPage = function(json) {
   this.name = json.name;
   this.access_token = json.access_token;
   this.perms = json.perms;
-  this.pictureUrl = "http://graph.facebook.com/" + json.id + "/picture?type=square";
+  this.pictureUrl = 'http://graph.facebook.com/' + json.id + '/picture?type=square';
   this.originalPayload = json;
   this.originalPayloadJSON = function() {
     return JSON.stringify(this.originalPayload);
@@ -32,28 +32,28 @@ var FacebookPage = function(json) {
 };
 
 var FACEBOOK_USER_FIELDS = [
-  "email",
-  "name",
-  "first_name",
-  "last_name",
-  "age_range",
-  "birthday",
-  "gender",
-  "hometown",
-  "interested_in",
-  "locale",
-  "location",
-  "relationship_status",
+  'email',
+  'name',
+  'first_name',
+  'last_name',
+  'age_range',
+  'birthday',
+  'gender',
+  'hometown',
+  'interested_in',
+  'locale',
+  'location',
+  'relationship_status',
 ];
 
 var TinyShowApi = {
   getExistingUser: function(onSuccess) {
     var auth = FB.getAuthResponse();
     $.ajax({
-      url: "/existing_user",
-      data: {facebookId: auth["userID"], accessToken: auth["accessToken"]},
-      type: "GET",
-      dataType: "json",
+      url: '/existing_user',
+      data: {facebookId: auth['userID'], accessToken: auth['accessToken']},
+      type: 'GET',
+      dataType: 'json',
       success: function(user) {
         onSuccess(user);
       },
@@ -74,7 +74,7 @@ var TinyShowFacebookApi = {
     });
   },
   getCurrentUserProfile: function(success) {
-    FB.api('/me?fields='+FACEBOOK_USER_FIELDS.join(","), function(response) {
+    FB.api('/me?fields='+FACEBOOK_USER_FIELDS.join(','), function(response) {
       success(new FacebookUser(response, FB.getAuthResponse()['accessToken']));
     });
   },
@@ -82,11 +82,10 @@ var TinyShowFacebookApi = {
     FB.api('/me/permissions', function(response) {
       var gantedPermissions = [];
       _.each(response.data, function(permission) {
-        if (permission["status"] == "granted") {
-          gantedPermissions.push(permission["permission"]);
+        if (permission['status'] == 'granted') {
+          gantedPermissions.push(permission['permission']);
         }
       });
-      console.log(gantedPermissions);
       success(gantedPermissions);
     });
   },

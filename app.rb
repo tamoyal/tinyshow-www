@@ -17,6 +17,7 @@ Tilt.register Tilt::ERBTemplate, 'html.erb'
 Koala::Utils.level = Logger::DEBUG
 
 configure do
+	set :views, File.dirname(__FILE__) + '/app/views'
 	set :domain, Host.get
 	set :iphone_app_store_link, "/dl" # TODO: change this to the actual link
 end
