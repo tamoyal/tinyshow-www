@@ -1,8 +1,11 @@
 body {
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   background: #111;
   color: #eee;
 }
 .blue {
   color: #00A1E4;
+}
+.pink {
+  color: #FF0089;
 }

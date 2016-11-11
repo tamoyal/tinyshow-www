@@ -19775,6 +19775,7 @@
 	var TSMissingPermissions = __webpack_require__(161);
 	var TSUserSettings = __webpack_require__(162);
 	var TSUserSettingsEdit = __webpack_require__(165);
+	var TSNavigation = __webpack_require__(166);
 
 	var TSCreators = function (_React$Component) {
 	  _inherits(TSCreators, _React$Component);
@@ -19784,8 +19785,12 @@
 
 	    var _this = _possibleConstructorReturn(this, (TSCreators.__proto__ || Object.getPrototypeOf(TSCreators)).call(this, props));
 
-	    _this.state = { currentUser: null };
+	    _this.state = { currentUser: null, missingPermissions: null };
 	    _this.onLogin = _this.onLogin.bind(_this);
+	    _this.checkPermissions = _this.checkPermissions.bind(_this);
+	    _this.isThroughFacebook = _this.isThroughFacebook.bind(_this);
+	    _this.grant = _this.grant.bind(_this);
+	    _this.facebookConnected = _this.facebookConnected.bind(_this);
 	    return _this;
 	  }
 
@@ -19793,33 +19798,99 @@
 	    key: 'onLogin',
 	    value: function onLogin(u) {
 	      this.setState({ currentUser: u });
+	      this.checkPermissions();
+	    }
+	  }, {
+	    key: 'checkPermissions',
+	    value: function checkPermissions() {
+	      var _this2 = this;
+
+	      TinyShowFacebookApi.getGrantedPermissions(function (gantedPermissions) {
+	        var missingPermissions = _.filter(REQUIRED_CREATOR_PERMISSIONS, function (requiredPermission) {
+	          return gantedPermissions.indexOf(requiredPermission) < 0;
+	        });
+	        _this2.setState({ missingPermissions: missingPermissions });
+	      });
+	    }
+	  }, {
+	    key: 'grant',
+	    value: function grant() {
+	      var _this3 = this;
+
+	      FB.login(function (response) {
+	        _this3.setState({ missingPermissions: [] });
+	      }, {
+	        scope: this.state.missingPermissions.join(','),
+	        auth_type: 'rerequest'
+	      });
+	    }
+	  }, {
+	    key: 'facebookConnected',
+	    value: function facebookConnected() {
+	      var _this4 = this;
+
+	      TinyShowApi.getExistingUser(function (u) {
+	        if (u['id']) {
+	          _this4.setState({ currentUser: new TinyShowUser(u) });
+	          _this4.onLogin(new TinyShowUser(u));
+	        } else {
+	          TinyShowFacebookApi.getCurrentUserProfile(function (facebookUser) {
+	            _this4.setState({ currentUser: facebookUser });
+	            _this4.onLogin(facebookUser);
+	          });
+	        }
+	      });
+	    }
+	  }, {
+	    key: 'isThroughFacebook',
+	    value: function isThroughFacebook() {
+	      return this.state.currentUser && this.state.missingPermissions != null && this.state.missingPermissions.length == 0;
+	    }
+	  }, {
+	    key: 'hayMissingPermissions',
+	    value: function hayMissingPermissions() {
+	      return this.state.missingPermissions != null && this.state.missingPermissions.length > 0;
 	    }
 	  }, {
 	    key: 'render',
 	    value: function render() {
 	      return _react2.default.createElement(
 	        'div',
-	        { style: { padding: '20px 0px 40px 60px', width: 600 } },
+	        null,
+	        _react2.default.createElement(TSNavigation, { currentUser: this.state.currentUser }),
 	        _react2.default.createElement(
 	          'div',
-	          { style: { fontSize: 40, fontWeight: 200 } },
-	          'TinyShow Connect'
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { style: { fontSize: 20 } },
-	          'Connect your ',
-	          _react2.default.createElement(
-	            'span',
-	            { className: 'blue' },
-	            'Facebook'
+	          { style: { padding: '20px 0px 40px 60px', width: 600 } },
+	          !this.state.currentUser && _react2.default.createElement(
+	            'div',
+	            { style: { fontSize: 16, marginTop: 8 } },
+	            _react2.default.createElement(
+	              'span',
+	              { className: 'pink' },
+	              'Boost'
+	            ),
+	            ' increases your ',
+	            _react2.default.createElement(
+	              'span',
+	              { className: 'blue' },
+	              'Facebook'
+	            ),
+	            ' event RSVP\'s by making it ',
+	            _react2.default.createElement(
+	              'u',
+	              null,
+	              'super easy'
+	            ),
+	            ' for users to respond. Get setup in less than 60 seconds.'
 	          ),
-	          ' events to the TinyShow App'
-	        ),
-	        _react2.default.createElement(TSLoginBox, { onLogin: this.onLogin }),
-	        this.state.currentUser && _react2.default.createElement(TSMissingPermissions, null),
-	        this.state.currentUser && this.state.currentUser instanceof TinyShowUser && _react2.default.createElement(TSUserSettings, { user: this.state.currentUser }),
-	        this.state.currentUser && !(this.state.currentUser instanceof TinyShowUser) && _react2.default.createElement(TSUserSettingsEdit, { user: this.state.currentUser })
+	          !this.state.currentUser && _react2.default.createElement(TSLoginBox, { facebookConnected: this.facebookConnected }),
+	          this.hayMissingPermissions() && _react2.default.createElement(TSMissingPermissions, {
+	            missingPermissions: this.state.missingPermissions,
+	            onGrant: this.grant
+	          }),
+	          this.isThroughFacebook() && this.state.currentUser instanceof TinyShowUser && _react2.default.createElement(TSUserSettings, { user: this.state.currentUser }),
+	          this.isThroughFacebook() && !(this.state.currentUser instanceof TinyShowUser) && _react2.default.createElement(TSUserSettingsEdit, { user: this.state.currentUser })
+	        )
 	      );
 	    }
 	  }]);
@@ -19861,7 +19932,7 @@
 	    _this.checkLoginState = _this.checkLoginState.bind(_this);
 	    _this.statusChangeCallback = _this.statusChangeCallback.bind(_this);
 	    _this.login = _this.login.bind(_this);
-	    _this.loadCurrentUser = _this.loadCurrentUser.bind(_this);
+	    // this.loadCurrentUser = this.loadCurrentUser.bind(this);
 	    return _this;
 	  }
 
@@ -19870,29 +19941,27 @@
 	    value: function checkLoginState() {
 	      FB.getLoginStatus(this.statusChangeCallback);
 	    }
-	  }, {
-	    key: 'loadCurrentUser',
-	    value: function loadCurrentUser() {
-	      var _this2 = this;
+	    // loadCurrentUser() {
+	    //   TinyShowApi.getExistingUser(u => {
+	    //     if (u['id']) {
+	    //       this.setState({loaded: true, currentUser: new TinyShowUser(u)});
+	    //       this.props.onLogin(new TinyShowUser(u));
+	    //     } else {
+	    //       TinyShowFacebookApi.getCurrentUserProfile(facebookUser => {
+	    //         this.setState({loaded: true, currentUser: facebookUser});
+	    //         this.props.onLogin(facebookUser);
+	    //       });
+	    //     }
+	    //   });
+	    // }
 
-	      TinyShowApi.getExistingUser(function (u) {
-	        if (u['id']) {
-	          _this2.setState({ loaded: true, currentUser: new TinyShowUser(u) });
-	          _this2.props.onLogin(new TinyShowUser(u));
-	        } else {
-	          TinyShowFacebookApi.getCurrentUserProfile(function (facebookUser) {
-	            _this2.setState({ loaded: true, currentUser: facebookUser });
-	            _this2.props.onLogin(facebookUser);
-	          });
-	        }
-	      });
-	    }
 	  }, {
 	    key: 'statusChangeCallback',
 	    value: function statusChangeCallback(response) {
 	      if (response.status === 'connected') {
 	        // Logged into your app and Facebook.
-	        this.loadCurrentUser();
+	        //this.loadCurrentUser();
+	        this.props.facebookConnected();
 	      } else if (response.status === 'not_authorized') {
 	        // The person is logged into Facebook, but not your app.
 	        this.setState({ loaded: true });
@@ -19910,7 +19979,7 @@
 	  }, {
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
-	      var _this3 = this;
+	      var _this2 = this;
 
 	      // this.checkLoginState();
 	      window.fbAsyncInit = function () {
@@ -19935,7 +20004,7 @@
 	        // These three cases are handled in the callback function.
 
 	        FB.getLoginStatus(function (response) {
-	          _this3.statusChangeCallback(response);
+	          _this2.statusChangeCallback(response);
 	        });
 	      };
 
@@ -19959,33 +20028,17 @@
 	          'div',
 	          {
 	            style: {
-	              borderTop: '1px solid #eee',
-	              borderBottom: '1px solid #eee',
 	              padding: '16px 0px 16px 0px',
 	              margin: '20px 0px 20px 0px'
 	            } },
-	          this.state.currentUser ? _react2.default.createElement(
+	          !this.state.currentUser && _react2.default.createElement(
 	            'div',
 	            null,
-	            _react2.default.createElement('img', { src: this.state.currentUser.pictureUrl }),
-	            _react2.default.createElement(
-	              'div',
-	              { style: { fontSize: 12 } },
-	              'Logged in as:',
-	              _react2.default.createElement(
-	                'span',
-	                { className: 'blue' },
-	                this.state.currentUser.fullName
-	              )
-	            )
-	          ) : _react2.default.createElement(
-	            'div',
-	            null,
-	            'LOGIN TO SELECT YOUR FACEBOOK PAGE:',
 	            _react2.default.createElement(
 	              'a',
-	              { href: '#', onClick: this.login },
-	              'LOGIN'
+	              { className: 'btn btn-block btn-social btn-facebook', onClick: this.login },
+	              _react2.default.createElement('span', { className: 'fa fa-facebook' }),
+	              ' Sign in with Facebook to connect your events'
 	            )
 	          )
 	        ),
@@ -20033,51 +20086,35 @@
 
 	    var _this = _possibleConstructorReturn(this, (TSMissingPermissions.__proto__ || Object.getPrototypeOf(TSMissingPermissions)).call(this, props));
 
-	    _this.state = { missingPermissions: [] };
-	    _this.checkPermissions = _this.checkPermissions.bind(_this);
 	    _this.doGrant = _this.doGrant.bind(_this);
 	    return _this;
 	  }
 
 	  _createClass(TSMissingPermissions, [{
-	    key: 'checkPermissions',
-	    value: function checkPermissions() {
-	      var _this2 = this;
-
-	      TinyShowFacebookApi.getGrantedPermissions(function (gantedPermissions) {
-	        var missingPermissions = _.filter(REQUIRED_CREATOR_PERMISSIONS, function (requiredPermission) {
-	          return gantedPermissions.indexOf(requiredPermission) < 0;
-	        });
-	        _this2.setState({ missingPermissions: missingPermissions });
-	      });
-	    }
-	  }, {
 	    key: 'doGrant',
 	    value: function doGrant(e) {
-	      var _this3 = this;
-
 	      e.preventDefault();
-	      FB.login(function (response) {
-	        _this3.setState = { missingPermissions: [] };
-	      }, {
-	        scope: this.state.missingPermissions.join(','),
-	        auth_type: 'rerequest'
-	      });
-	    }
-	  }, {
-	    key: 'componentDidMount',
-	    value: function componentDidMount() {
-	      this.checkPermissions();
+	      this.props.onGrant();
 	    }
 	  }, {
 	    key: 'render',
 	    value: function render() {
 	      return _react2.default.createElement(
 	        'div',
-	        null,
-	        this.state.missingPermissions.length > 0 && _react2.default.createElement(
+	        {
+	          className: 'well',
+	          style: {
+	            backgroundColor: '#222',
+	            border: 'none'
+	          } },
+	        _react2.default.createElement(
 	          'div',
 	          null,
+	          _react2.default.createElement(
+	            'h2',
+	            null,
+	            'Important!'
+	          ),
 	          _react2.default.createElement(
 	            'div',
 	            null,
@@ -20086,7 +20123,7 @@
 	          _react2.default.createElement(
 	            'ul',
 	            { id: 'permissions_list' },
-	            this.state.missingPermissions.map(function (p, k) {
+	            this.props.missingPermissions.map(function (p, k) {
 	              return _react2.default.createElement(
 	                'li',
 	                { key: k },
@@ -20095,12 +20132,22 @@
 	            })
 	          ),
 	          _react2.default.createElement(
-	            'a',
+	            'button',
 	            {
-	              id: 'do_grant',
 	              onClick: this.doGrant,
-	              href: '#' },
-	            'Grant \xBB'
+	              type: 'button',
+	              className: 'btn btn-default',
+	              ariaLabel: 'Left Align',
+	              style: {
+	                backgroundColor: '#26499f',
+	                color: 'white',
+	                border: 'none'
+	              } },
+	            _react2.default.createElement('i', {
+	              className: 'fa fa-facebook',
+	              ariaHidden: 'true',
+	              style: { marginRight: 8 } }),
+	            'Grant'
 	          )
 	        )
 	      );
@@ -20265,7 +20312,7 @@
 	      return _react2.default.createElement(
 	        'div',
 	        _extends({}, this.props, {
-	          style: TSHelpers.mergeObj({
+	          style: _TSHelpers2.default.mergeObj({
 	            display: 'flex',
 	            alignItems: 'center'
 	          }, this.props.style) }),
@@ -20544,6 +20591,194 @@
 	}(_react2.default.Component);
 
 	module.exports = TSUserSettingsEdit;
+
+/***/ },
+/* 166 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var TSBoostBranding = __webpack_require__(167);
+	var TSProfileSpot = __webpack_require__(168);
+
+	var TSNavigation = function (_React$Component) {
+	  _inherits(TSNavigation, _React$Component);
+
+	  function TSNavigation() {
+	    _classCallCheck(this, TSNavigation);
+
+	    return _possibleConstructorReturn(this, (TSNavigation.__proto__ || Object.getPrototypeOf(TSNavigation)).apply(this, arguments));
+	  }
+
+	  _createClass(TSNavigation, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        {
+	          className: 'row',
+	          style: {
+	            width: '100%',
+	            padding: '12px 60px 12px 60px',
+	            backgroundColor: '#222',
+	            margin: 0
+	          } },
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'col-lg-10 col-md-10' },
+	          _react2.default.createElement(TSBoostBranding, null)
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'col-lg-2 col-md-2' },
+	          this.props.currentUser && _react2.default.createElement(TSProfileSpot, { user: this.props.currentUser })
+	        )
+	      );
+	    }
+	  }]);
+
+	  return TSNavigation;
+	}(_react2.default.Component);
+
+	module.exports = TSNavigation;
+
+/***/ },
+/* 167 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var TSBoostBranding = function (_React$Component) {
+	  _inherits(TSBoostBranding, _React$Component);
+
+	  function TSBoostBranding() {
+	    _classCallCheck(this, TSBoostBranding);
+
+	    return _possibleConstructorReturn(this, (TSBoostBranding.__proto__ || Object.getPrototypeOf(TSBoostBranding)).apply(this, arguments));
+	  }
+
+	  _createClass(TSBoostBranding, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        { style: { fontSize: 34 } },
+	        _react2.default.createElement(
+	          'span',
+	          { style: { fontFamily: 'HelveticaNeue-Thin' } },
+	          'Tiny'
+	        ),
+	        _react2.default.createElement(
+	          'span',
+	          null,
+	          'SHOW'
+	        ),
+	        _react2.default.createElement(
+	          'span',
+	          {
+	            className: 'pink',
+	            style: {
+	              fontFamily: 'HelveticaNeue',
+	              marginLeft: 20
+	            } },
+	          _react2.default.createElement('i', {
+	            style: { marginRight: 2 },
+	            className: 'fa fa-bolt',
+	            'aria-hidden': 'true' }),
+	          'boost'
+	        )
+	      );
+	    }
+	  }]);
+
+	  return TSBoostBranding;
+	}(_react2.default.Component);
+
+	module.exports = TSBoostBranding;
+
+/***/ },
+/* 168 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var TSVerticalCenter = __webpack_require__(163);
+
+	var TSProfileSpot = function (_React$Component) {
+	  _inherits(TSProfileSpot, _React$Component);
+
+	  function TSProfileSpot() {
+	    _classCallCheck(this, TSProfileSpot);
+
+	    return _possibleConstructorReturn(this, (TSProfileSpot.__proto__ || Object.getPrototypeOf(TSProfileSpot)).apply(this, arguments));
+	  }
+
+	  _createClass(TSProfileSpot, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        TSVerticalCenter,
+	        null,
+	        _react2.default.createElement(
+	          'div',
+	          { style: { fontSize: 18, paddingRight: 4 } },
+	          _react2.default.createElement(
+	            'span',
+	            { className: 'blue' },
+	            this.props.user.firstName
+	          )
+	        ),
+	        _react2.default.createElement('img', { src: this.props.user.pictureUrl })
+	      );
+	    }
+	  }]);
+
+	  return TSProfileSpot;
+	}(_react2.default.Component);
+
+	module.exports = TSProfileSpot;
 
 /***/ }
 /******/ ]);

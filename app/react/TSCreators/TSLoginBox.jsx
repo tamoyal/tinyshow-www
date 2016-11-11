@@ -7,28 +7,29 @@ class TSLoginBox extends React.Component {
     this.checkLoginState = this.checkLoginState.bind(this);
     this.statusChangeCallback = this.statusChangeCallback.bind(this);
     this.login = this.login.bind(this);
-    this.loadCurrentUser = this.loadCurrentUser.bind(this);
+    // this.loadCurrentUser = this.loadCurrentUser.bind(this);
   }
   checkLoginState() {
     FB.getLoginStatus(this.statusChangeCallback);
   }
-  loadCurrentUser() {
-    TinyShowApi.getExistingUser(u => {
-      if (u['id']) {
-        this.setState({loaded: true, currentUser: new TinyShowUser(u)});
-        this.props.onLogin(new TinyShowUser(u));
-      } else {
-        TinyShowFacebookApi.getCurrentUserProfile(facebookUser => {
-          this.setState({loaded: true, currentUser: facebookUser});
-          this.props.onLogin(facebookUser);
-        });
-      }
-    });
-  }
+  // loadCurrentUser() {
+  //   TinyShowApi.getExistingUser(u => {
+  //     if (u['id']) {
+  //       this.setState({loaded: true, currentUser: new TinyShowUser(u)});
+  //       this.props.onLogin(new TinyShowUser(u));
+  //     } else {
+  //       TinyShowFacebookApi.getCurrentUserProfile(facebookUser => {
+  //         this.setState({loaded: true, currentUser: facebookUser});
+  //         this.props.onLogin(facebookUser);
+  //       });
+  //     }
+  //   });
+  // }
   statusChangeCallback(response) {
     if (response.status === 'connected') {
       // Logged into your app and Facebook.
-      this.loadCurrentUser();
+      //this.loadCurrentUser();
+      this.props.facebookConnected();
     } else if (response.status === 'not_authorized') {
       // The person is logged into Facebook, but not your app.
       this.setState({loaded: true});
@@ -84,27 +85,15 @@ class TSLoginBox extends React.Component {
         {this.state.loaded &&
           <div
             style={{
-              borderTop: '1px solid #eee',
-              borderBottom: '1px solid #eee',
               padding: '16px 0px 16px 0px',
               margin: '20px 0px 20px 0px',
             }}>
-            {this.state.currentUser
-              ?
-                <div>
-                  <img src={this.state.currentUser.pictureUrl} />
-                  <div style={{fontSize: 12}}>
-                    Logged in as:
-                    <span className="blue">
-                      {this.state.currentUser.fullName}
-                    </span>
-                  </div>
-                </div>
-              :
-                <div>
-                  LOGIN TO SELECT YOUR FACEBOOK PAGE:
-                  <a href="#" onClick={this.login}>LOGIN</a>
-                </div>
+            {!this.state.currentUser &&
+              <div>
+                <a className="btn btn-block btn-social btn-facebook" onClick={this.login}>
+                  <span className="fa fa-facebook"></span> Sign in with Facebook to connect your events 
+                </a>
+              </div>
             }
           </div>
         }

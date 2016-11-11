@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import TinyShowHelpers from '../../TSHelpers.js';
+import TSHelpers from '../../TSHelpers.js';
 
 class TSVerticalCenter extends React.Component {
   render() {

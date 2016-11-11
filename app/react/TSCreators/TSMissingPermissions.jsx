@@ -3,55 +3,53 @@ import React, {Component} from 'react';
 class TSMissingPermissions extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {missingPermissions: []};
-    this.checkPermissions = this.checkPermissions.bind(this);
     this.doGrant = this.doGrant.bind(this);
-  }
-  checkPermissions() {
-    TinyShowFacebookApi.getGrantedPermissions(gantedPermissions => {
-      var missingPermissions = _.filter(REQUIRED_CREATOR_PERMISSIONS,
-        requiredPermission => {
-          return gantedPermissions.indexOf(requiredPermission) < 0;
-        });
-      this.setState({missingPermissions: missingPermissions});
-    });
   }
   doGrant(e) {
     e.preventDefault();
-    FB.login(response => {
-      this.setState = {missingPermissions: []};
-    },
-    {
-      scope: this.state.missingPermissions.join(','),
-      auth_type: 'rerequest'
-    });
-  }
-  componentDidMount() {
-    this.checkPermissions();
+    this.props.onGrant();
   }
   render() {
     return (
-      <div>
-        {this.state.missingPermissions.length > 0 &&
+      <div
+        className="well"
+        style={{
+          backgroundColor: '#222',
+          border: 'none',
+        }}>
+        <div>
+          <h2>Important!</h2>
+
           <div>
-            <div>
-              You must grant the following permissions to connect your events to TinyShow:
-            </div>
-            <ul id="permissions_list">
-              {this.state.missingPermissions.map((p, k) => {
-                return (
-                  <li key={k}>{p}</li>
-                )
-              })}
-            </ul>
-            <a
-              id="do_grant"
-              onClick={this.doGrant}
-              href="#" >
-              Grant &raquo;
-            </a>
+            You must grant the following permissions to connect your events to TinyShow:
           </div>
-        }
+
+          <ul id="permissions_list">
+            {this.props.missingPermissions.map((p, k) => {
+              return (
+                <li key={k}>{p}</li>
+              )
+            })}
+          </ul>
+
+          <button
+            onClick={this.doGrant}
+            type="button"
+            className="btn btn-default"
+            ariaLabel="Left Align"
+            style={{
+              backgroundColor: '#26499f',
+              color: 'white',
+              border: 'none',
+            }}>
+            <i
+              className="fa fa-facebook"
+              ariaHidden="true"
+              style={{marginRight: 8}}>
+            </i>
+            Grant
+          </button>
+        </div>
       </div>
     )
   }
