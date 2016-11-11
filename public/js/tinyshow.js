@@ -1,5 +1,5 @@
 var TinyShowUser = function(json) {
-  this.fullName = json.first_name;
+  this.firstName = json.first_name;
   this.pictureUrl = 'http://graph.facebook.com/' + json.facebook_id + '/picture?type=square';
   this.facebook_pages = json.facebook_pages;
 }

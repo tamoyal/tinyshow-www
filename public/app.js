@@ -19788,7 +19788,7 @@
 	    _this.state = { currentUser: null, missingPermissions: null };
 	    _this.onLogin = _this.onLogin.bind(_this);
 	    _this.checkPermissions = _this.checkPermissions.bind(_this);
-	    _this.isThroughFacebook = _this.isThroughFacebook.bind(_this);
+	    _this.throughFacebook = _this.throughFacebook.bind(_this);
 	    _this.grant = _this.grant.bind(_this);
 	    _this.facebookConnected = _this.facebookConnected.bind(_this);
 	    return _this;
@@ -19818,6 +19818,8 @@
 	      var _this3 = this;
 
 	      FB.login(function (response) {
+	        console.log("SHOULD NOT BE SETTING missingPermissions empty here,\
+	        this just means login button was hit but they could have rejected the grant");
 	        _this3.setState({ missingPermissions: [] });
 	      }, {
 	        scope: this.state.missingPermissions.join(','),
@@ -19842,8 +19844,8 @@
 	      });
 	    }
 	  }, {
-	    key: 'isThroughFacebook',
-	    value: function isThroughFacebook() {
+	    key: 'throughFacebook',
+	    value: function throughFacebook() {
 	      return this.state.currentUser && this.state.missingPermissions != null && this.state.missingPermissions.length == 0;
 	    }
 	  }, {
@@ -19888,8 +19890,8 @@
 	            missingPermissions: this.state.missingPermissions,
 	            onGrant: this.grant
 	          }),
-	          this.isThroughFacebook() && this.state.currentUser instanceof TinyShowUser && _react2.default.createElement(TSUserSettings, { user: this.state.currentUser }),
-	          this.isThroughFacebook() && !(this.state.currentUser instanceof TinyShowUser) && _react2.default.createElement(TSUserSettingsEdit, { user: this.state.currentUser })
+	          this.throughFacebook() && this.state.currentUser instanceof TinyShowUser && _react2.default.createElement(TSUserSettings, { user: this.state.currentUser }),
+	          this.throughFacebook() && !(this.state.currentUser instanceof TinyShowUser) && _react2.default.createElement(TSUserSettingsEdit, { user: this.state.currentUser })
 	        )
 	      );
 	    }
@@ -19932,7 +19934,6 @@
 	    _this.checkLoginState = _this.checkLoginState.bind(_this);
 	    _this.statusChangeCallback = _this.statusChangeCallback.bind(_this);
 	    _this.login = _this.login.bind(_this);
-	    // this.loadCurrentUser = this.loadCurrentUser.bind(this);
 	    return _this;
 	  }
 
@@ -19941,26 +19942,11 @@
 	    value: function checkLoginState() {
 	      FB.getLoginStatus(this.statusChangeCallback);
 	    }
-	    // loadCurrentUser() {
-	    //   TinyShowApi.getExistingUser(u => {
-	    //     if (u['id']) {
-	    //       this.setState({loaded: true, currentUser: new TinyShowUser(u)});
-	    //       this.props.onLogin(new TinyShowUser(u));
-	    //     } else {
-	    //       TinyShowFacebookApi.getCurrentUserProfile(facebookUser => {
-	    //         this.setState({loaded: true, currentUser: facebookUser});
-	    //         this.props.onLogin(facebookUser);
-	    //       });
-	    //     }
-	    //   });
-	    // }
-
 	  }, {
 	    key: 'statusChangeCallback',
 	    value: function statusChangeCallback(response) {
 	      if (response.status === 'connected') {
 	        // Logged into your app and Facebook.
-	        //this.loadCurrentUser();
 	        this.props.facebookConnected();
 	      } else if (response.status === 'not_authorized') {
 	        // The person is logged into Facebook, but not your app.
@@ -20036,7 +20022,9 @@
 	            null,
 	            _react2.default.createElement(
 	              'a',
-	              { className: 'btn btn-block btn-social btn-facebook', onClick: this.login },
+	              {
+	                className: 'btn btn-block btn-social btn-facebook',
+	                onClick: this.login },
 	              _react2.default.createElement('span', { className: 'fa fa-facebook' }),
 	              ' Sign in with Facebook to connect your events'
 	            )

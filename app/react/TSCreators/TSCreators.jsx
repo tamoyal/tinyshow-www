@@ -12,7 +12,7 @@ class TSCreators extends React.Component {
     this.state = {currentUser: null, missingPermissions: null};
     this.onLogin = this.onLogin.bind(this);
     this.checkPermissions = this.checkPermissions.bind(this);
-    this.isThroughFacebook = this.isThroughFacebook.bind(this);
+    this.throughFacebook = this.throughFacebook.bind(this);
     this.grant = this.grant.bind(this);
     this.facebookConnected = this.facebookConnected.bind(this);
   }
@@ -31,7 +31,8 @@ class TSCreators extends React.Component {
   }
   grant() {
     FB.login(response => {
-      console.log("SHOULD NOT BE SETTING missingPermissions empty here, this just means login button was hit but they could have rejected the grant");
+      console.log("SHOULD NOT BE SETTING missingPermissions empty here,\
+        this just means login button was hit but they could have rejected the grant");
       this.setState({missingPermissions: []});
     },
     {
@@ -52,7 +53,7 @@ class TSCreators extends React.Component {
       }
     });
   }
-  isThroughFacebook() {
+  throughFacebook() {
     return this.state.currentUser &&
       this.state.missingPermissions != null &&
       this.state.missingPermissions.length == 0;
@@ -83,11 +84,11 @@ class TSCreators extends React.Component {
             />
           }
 
-          {this.isThroughFacebook() && this.state.currentUser instanceof TinyShowUser &&
+          {this.throughFacebook() && this.state.currentUser instanceof TinyShowUser &&
             <TSUserSettings user={this.state.currentUser} />
           }
 
-          {this.isThroughFacebook() && !(this.state.currentUser instanceof TinyShowUser) &&
+          {this.throughFacebook() && !(this.state.currentUser instanceof TinyShowUser) &&
             <TSUserSettingsEdit user={this.state.currentUser} />
           }
         </div>
