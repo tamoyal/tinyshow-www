@@ -1,5 +1,10 @@
 var TinyShowUser = function(json) {
+  this.tinyShowID = json.id;
   this.firstName = json.first_name;
+  this.lastName = json.last_name;
+  this.email = json.email;
+  this.phone = json.phone;
+  this.get_events_from_user_fb_account = json.get_events_from_user_fb_account;
   this.pictureUrl = 'http://graph.facebook.com/' + json.facebook_id + '/picture?type=square';
   this.facebook_pages = json.facebook_pages;
 }
@@ -10,6 +15,7 @@ var FacebookUser = function(json, accessToken) {
   this.firstName = json.first_name;
   this.lastName = json.last_name;
   this.email = json.email;
+  this.phone = '';
   this.pages = [];
   this.pictureUrl = 'http://graph.facebook.com/' + json.id + '/picture?type=square';
   this.accessToken = accessToken;
@@ -31,21 +37,6 @@ var FacebookPage = function(json) {
   }
 };
 
-var FACEBOOK_USER_FIELDS = [
-  'email',
-  'name',
-  'first_name',
-  'last_name',
-  'age_range',
-  'birthday',
-  'gender',
-  'hometown',
-  'interested_in',
-  'locale',
-  'location',
-  'relationship_status',
-];
-
 var TinyShowApi = {
   getExistingUser: function(onSuccess) {
     var auth = FB.getAuthResponse();
@@ -62,31 +53,4 @@ var TinyShowApi = {
       }
     });
   }
-}
-
-var TinyShowFacebookApi = {
-  getPagesList: function(success) {    
-    FB.api('/me/accounts', function(response) {
-      var facebookPages = _.map(response.data, function(pageJSON) {
-        return new FacebookPage(pageJSON);
-      });
-      success(facebookPages);
-    });
-  },
-  getCurrentUserProfile: function(success) {
-    FB.api('/me?fields='+FACEBOOK_USER_FIELDS.join(','), function(response) {
-      success(new FacebookUser(response, FB.getAuthResponse()['accessToken']));
-    });
-  },
-  getGrantedPermissions: function(success) {
-    FB.api('/me/permissions', function(response) {
-      var gantedPermissions = [];
-      _.each(response.data, function(permission) {
-        if (permission['status'] == 'granted') {
-          gantedPermissions.push(permission['permission']);
-        }
-      });
-      success(gantedPermissions);
-    });
-  },
 }

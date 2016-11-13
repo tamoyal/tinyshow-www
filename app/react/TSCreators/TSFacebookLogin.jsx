@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 
-class TSLoginBox extends React.Component {
+class TSFacebookLogin extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {loaded: false, currentUser: null};
+    this.state = {loaded: false};
     this.checkLoginState = this.checkLoginState.bind(this);
     this.statusChangeCallback = this.statusChangeCallback.bind(this);
     this.login = this.login.bind(this);
@@ -73,15 +73,13 @@ class TSLoginBox extends React.Component {
               padding: '16px 0px 16px 0px',
               margin: '20px 0px 20px 0px',
             }}>
-            {!this.state.currentUser &&
-              <div>
-                <a
-                  className="btn btn-block btn-social btn-facebook"
-                  onClick={this.login}>
-                  <span className="fa fa-facebook"></span> Sign in with Facebook to connect your events 
-                </a>
-              </div>
-            }
+            <div>
+              <a
+                className="btn btn-block btn-social btn-facebook"
+                onClick={this.login}>
+                <span className="fa fa-facebook"></span> Sign in with Facebook to connect your events 
+              </a>
+            </div>
           </div>
         }
 
@@ -93,4 +91,4 @@ class TSLoginBox extends React.Component {
   }
 };
 
-module.exports = TSLoginBox;
+module.exports = TSFacebookLogin;

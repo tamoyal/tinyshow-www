@@ -104,7 +104,8 @@ post '/users' do
 		end
 
 		if u.save
-			respond(201, {})
+			u = User.where(id: u.id).includes(:facebook_pages)
+			respond(201, u.to_json(:include => [:facebook_pages]))
 		else
 			respond(422, u.errors)
 		end

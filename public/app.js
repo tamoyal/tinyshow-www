@@ -19771,56 +19771,96 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var TSLoginBox = __webpack_require__(160);
+	var TSFacebookLogin = __webpack_require__(160);
 	var TSMissingPermissions = __webpack_require__(161);
-	var TSUserSettings = __webpack_require__(162);
-	var TSUserSettingsEdit = __webpack_require__(165);
-	var TSNavigation = __webpack_require__(166);
+	var TSTopNavBar = __webpack_require__(162);
+	var TSBoostBranding = __webpack_require__(163);
+	var TSCreatorsDashboard = __webpack_require__(165);
+	var TSFacebookHelpers = __webpack_require__(172);
+	var TSStyle = __webpack_require__(164);
 
-	var TSCreators = function (_React$Component) {
-	  _inherits(TSCreators, _React$Component);
+	var TSBoostMarketing = function (_React$Component) {
+	  _inherits(TSBoostMarketing, _React$Component);
+
+	  function TSBoostMarketing() {
+	    _classCallCheck(this, TSBoostMarketing);
+
+	    return _possibleConstructorReturn(this, (TSBoostMarketing.__proto__ || Object.getPrototypeOf(TSBoostMarketing)).apply(this, arguments));
+	  }
+
+	  _createClass(TSBoostMarketing, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        { style: { fontSize: 16, marginTop: 8 } },
+	        _react2.default.createElement(
+	          'span',
+	          { style: { color: TSStyle.pink } },
+	          'Boost'
+	        ),
+	        ' increases your ',
+	        _react2.default.createElement(
+	          'span',
+	          { style: { color: TSStyle.lightBlue } },
+	          'Facebook'
+	        ),
+	        ' event RSVP\'s by making it ',
+	        _react2.default.createElement(
+	          'u',
+	          null,
+	          'super easy'
+	        ),
+	        ' for users to respond. Get setup in less than 60 seconds.'
+	      );
+	    }
+	  }]);
+
+	  return TSBoostMarketing;
+	}(_react2.default.Component);
+
+	var TSCreators = function (_React$Component2) {
+	  _inherits(TSCreators, _React$Component2);
 
 	  function TSCreators(props) {
 	    _classCallCheck(this, TSCreators);
 
-	    var _this = _possibleConstructorReturn(this, (TSCreators.__proto__ || Object.getPrototypeOf(TSCreators)).call(this, props));
+	    var _this2 = _possibleConstructorReturn(this, (TSCreators.__proto__ || Object.getPrototypeOf(TSCreators)).call(this, props));
 
-	    _this.state = { currentUser: null, missingPermissions: null };
-	    _this.onLogin = _this.onLogin.bind(_this);
-	    _this.checkPermissions = _this.checkPermissions.bind(_this);
-	    _this.throughFacebook = _this.throughFacebook.bind(_this);
-	    _this.grant = _this.grant.bind(_this);
-	    _this.facebookConnected = _this.facebookConnected.bind(_this);
-	    return _this;
+	    _this2.state = {
+	      curFacebookUser: null,
+	      curTinyShowUser: null,
+	      missingPermissions: null
+	    };
+	    _this2.checkPermissions = _this2.checkPermissions.bind(_this2);
+	    _this2.grant = _this2.grant.bind(_this2);
+	    _this2.facebookConnected = _this2.facebookConnected.bind(_this2);
+	    _this2.onSettingsSaved = _this2.onSettingsSaved.bind(_this2);
+	    return _this2;
 	  }
 
 	  _createClass(TSCreators, [{
-	    key: 'onLogin',
-	    value: function onLogin(u) {
-	      this.setState({ currentUser: u });
-	      this.checkPermissions();
-	    }
-	  }, {
 	    key: 'checkPermissions',
 	    value: function checkPermissions() {
-	      var _this2 = this;
+	      var _this3 = this;
 
-	      TinyShowFacebookApi.getGrantedPermissions(function (gantedPermissions) {
-	        var missingPermissions = _.filter(REQUIRED_CREATOR_PERMISSIONS, function (requiredPermission) {
-	          return gantedPermissions.indexOf(requiredPermission) < 0;
+	      TSFacebookHelpers.getGrantedPermissions(function (granted) {
+	        _this3.setState({
+	          missingPermissions: REQUIRED_CREATOR_PERMISSIONS.filter(function (p) {
+	            return granted.indexOf(p) < 0;
+	          })
 	        });
-	        _this2.setState({ missingPermissions: missingPermissions });
 	      });
 	    }
 	  }, {
 	    key: 'grant',
 	    value: function grant() {
-	      var _this3 = this;
+	      var _this4 = this;
 
 	      FB.login(function (response) {
 	        console.log("SHOULD NOT BE SETTING missingPermissions empty here,\
 	        this just means login button was hit but they could have rejected the grant");
-	        _this3.setState({ missingPermissions: [] });
+	        _this4.setState({ missingPermissions: [] });
 	      }, {
 	        scope: this.state.missingPermissions.join(','),
 	        auth_type: 'rerequest'
@@ -19829,24 +19869,18 @@
 	  }, {
 	    key: 'facebookConnected',
 	    value: function facebookConnected() {
-	      var _this4 = this;
+	      var _this5 = this;
 
+	      this.checkPermissions();
 	      TinyShowApi.getExistingUser(function (u) {
 	        if (u['id']) {
-	          _this4.setState({ currentUser: new TinyShowUser(u) });
-	          _this4.onLogin(new TinyShowUser(u));
+	          _this5.setState({ curTinyShowUser: new TinyShowUser(u) });
 	        } else {
-	          TinyShowFacebookApi.getCurrentUserProfile(function (facebookUser) {
-	            _this4.setState({ currentUser: facebookUser });
-	            _this4.onLogin(facebookUser);
+	          TSFacebookHelpers.getCurrentUserProfile(function (facebookUser) {
+	            _this5.setState({ curFacebookUser: facebookUser });
 	          });
 	        }
 	      });
-	    }
-	  }, {
-	    key: 'throughFacebook',
-	    value: function throughFacebook() {
-	      return this.state.currentUser && this.state.missingPermissions != null && this.state.missingPermissions.length == 0;
 	    }
 	  }, {
 	    key: 'hayMissingPermissions',
@@ -19854,44 +19888,67 @@
 	      return this.state.missingPermissions != null && this.state.missingPermissions.length > 0;
 	    }
 	  }, {
+	    key: 'onSettingsSaved',
+	    value: function onSettingsSaved(u) {
+	      this.setState({ curTinyShowUser: new TinyShowUser(u) });
+	    }
+	  }, {
+	    key: 'renderRegisteredUser',
+	    value: function renderRegisteredUser() {
+	      return _react2.default.createElement(TSCreatorsDashboard, { currentUser: this.state.curTinyShowUser });
+	    }
+	  }, {
+	    key: 'renderFacebookAuthenticatedUser',
+	    value: function renderFacebookAuthenticatedUser() {
+	      if (this.hayMissingPermissions()) {
+	        return;
+	        _react2.default.createElement(TSMissingPermissions, {
+	          missingPermissions: this.state.missingPermissions,
+	          onGrant: this.grant
+	        });
+	      } else {
+	        return;
+	        _react2.default.createElement(TSUserRegistration, {
+	          curFacebookUser: this.state.curFacebookUser,
+	          onSettingsSaved: this.onSettingsSaved
+	        });
+	      }
+	    }
+	  }, {
+	    key: 'renderUnauthenticated',
+	    value: function renderUnauthenticated() {
+	      return _react2.default.createElement(TSFacebookLogin, { facebookConnected: this.facebookConnected });
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
+	      var body;
+	      if (this.state.curTinyShowUser) {
+	        body = this.renderRegisteredUser();
+	      } else if (this.state.curFacebookUser) {
+	        body = this.renderFacebookAuthenticatedUser();
+	      } else {
+	        body = this.renderUnauthenticated();
+	      }
+
 	      return _react2.default.createElement(
 	        'div',
 	        null,
-	        _react2.default.createElement(TSNavigation, { currentUser: this.state.currentUser }),
+	        _react2.default.createElement(
+	          TSTopNavBar,
+	          null,
+	          _react2.default.createElement(TSBoostBranding, null)
+	        ),
 	        _react2.default.createElement(
 	          'div',
-	          { style: { padding: '20px 0px 40px 60px', width: 600 } },
-	          !this.state.currentUser && _react2.default.createElement(
-	            'div',
-	            { style: { fontSize: 16, marginTop: 8 } },
-	            _react2.default.createElement(
-	              'span',
-	              { className: 'pink' },
-	              'Boost'
-	            ),
-	            ' increases your ',
-	            _react2.default.createElement(
-	              'span',
-	              { className: 'blue' },
-	              'Facebook'
-	            ),
-	            ' event RSVP\'s by making it ',
-	            _react2.default.createElement(
-	              'u',
-	              null,
-	              'super easy'
-	            ),
-	            ' for users to respond. Get setup in less than 60 seconds.'
-	          ),
-	          !this.state.currentUser && _react2.default.createElement(TSLoginBox, { facebookConnected: this.facebookConnected }),
-	          this.hayMissingPermissions() && _react2.default.createElement(TSMissingPermissions, {
-	            missingPermissions: this.state.missingPermissions,
-	            onGrant: this.grant
-	          }),
-	          this.throughFacebook() && this.state.currentUser instanceof TinyShowUser && _react2.default.createElement(TSUserSettings, { user: this.state.currentUser }),
-	          this.throughFacebook() && !(this.state.currentUser instanceof TinyShowUser) && _react2.default.createElement(TSUserSettingsEdit, { user: this.state.currentUser })
+	          {
+	            style: {
+	              paddingTop: 60,
+	              paddingRight: 60,
+	              width: 800
+	            } },
+	          !this.state.curTinyShowUser && _react2.default.createElement(TSBoostMarketing, null),
+	          body
 	        )
 	      );
 	    }
@@ -19922,22 +19979,22 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var TSLoginBox = function (_React$Component) {
-	  _inherits(TSLoginBox, _React$Component);
+	var TSFacebookLogin = function (_React$Component) {
+	  _inherits(TSFacebookLogin, _React$Component);
 
-	  function TSLoginBox(props) {
-	    _classCallCheck(this, TSLoginBox);
+	  function TSFacebookLogin(props) {
+	    _classCallCheck(this, TSFacebookLogin);
 
-	    var _this = _possibleConstructorReturn(this, (TSLoginBox.__proto__ || Object.getPrototypeOf(TSLoginBox)).call(this, props));
+	    var _this = _possibleConstructorReturn(this, (TSFacebookLogin.__proto__ || Object.getPrototypeOf(TSFacebookLogin)).call(this, props));
 
-	    _this.state = { loaded: false, currentUser: null };
+	    _this.state = { loaded: false };
 	    _this.checkLoginState = _this.checkLoginState.bind(_this);
 	    _this.statusChangeCallback = _this.statusChangeCallback.bind(_this);
 	    _this.login = _this.login.bind(_this);
 	    return _this;
 	  }
 
-	  _createClass(TSLoginBox, [{
+	  _createClass(TSFacebookLogin, [{
 	    key: 'checkLoginState',
 	    value: function checkLoginState() {
 	      FB.getLoginStatus(this.statusChangeCallback);
@@ -20017,7 +20074,7 @@
 	              padding: '16px 0px 16px 0px',
 	              margin: '20px 0px 20px 0px'
 	            } },
-	          !this.state.currentUser && _react2.default.createElement(
+	          _react2.default.createElement(
 	            'div',
 	            null,
 	            _react2.default.createElement(
@@ -20039,12 +20096,12 @@
 	    }
 	  }]);
 
-	  return TSLoginBox;
+	  return TSFacebookLogin;
 	}(_react2.default.Component);
 
 	;
 
-	module.exports = TSLoginBox;
+	module.exports = TSFacebookLogin;
 
 /***/ },
 /* 161 */
@@ -20110,7 +20167,7 @@
 	          ),
 	          _react2.default.createElement(
 	            'ul',
-	            { id: 'permissions_list' },
+	            null,
 	            this.props.missingPermissions.map(function (p, k) {
 	              return _react2.default.createElement(
 	                'li',
@@ -20119,24 +20176,11 @@
 	              );
 	            })
 	          ),
-	          _react2.default.createElement(
-	            'button',
-	            {
-	              onClick: this.doGrant,
-	              type: 'button',
-	              className: 'btn btn-default',
-	              ariaLabel: 'Left Align',
-	              style: {
-	                backgroundColor: '#26499f',
-	                color: 'white',
-	                border: 'none'
-	              } },
-	            _react2.default.createElement('i', {
-	              className: 'fa fa-facebook',
-	              ariaHidden: 'true',
-	              style: { marginRight: 8 } }),
-	            'Grant'
-	          )
+	          _react2.default.createElement(TSIconButton, {
+	            onClick: this.doGrant,
+	            title: 'Grant',
+	            fontAwesomeIconClass: 'fa-facebook'
+	          })
 	        )
 	      );
 	    }
@@ -20167,100 +20211,355 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var TSVerticalCenter = __webpack_require__(163);
+	var TSTopNavBar = function (_React$Component) {
+	  _inherits(TSTopNavBar, _React$Component);
 
-	var TSUserSettings = function (_React$Component) {
-	  _inherits(TSUserSettings, _React$Component);
+	  function TSTopNavBar() {
+	    _classCallCheck(this, TSTopNavBar);
 
-	  function TSUserSettings(props) {
-	    _classCallCheck(this, TSUserSettings);
-
-	    var _this = _possibleConstructorReturn(this, (TSUserSettings.__proto__ || Object.getPrototypeOf(TSUserSettings)).call(this, props));
-
-	    _this.state = { allFacebookPages: [] };
-	    return _this;
+	    return _possibleConstructorReturn(this, (TSTopNavBar.__proto__ || Object.getPrototypeOf(TSTopNavBar)).apply(this, arguments));
 	  }
 
-	  _createClass(TSUserSettings, [{
-	    key: 'componentDidMount',
-	    value: function componentDidMount() {
-	      var _this2 = this;
-
-	      TinyShowFacebookApi.getPagesList(function (facebookPages) {
-	        _this2.setState({ allFacebookPages: facebookPages });
-	      });
-	    }
-	  }, {
+	  _createClass(TSTopNavBar, [{
 	    key: 'render',
 	    value: function render() {
-	      var selectedPages = [];
-
-	      if (this.state.allFacebookPages.length > 0) {
-	        var selectedIds = _.map(this.props.user.facebook_pages, function (page) {
-	          return page['facebook_id'];
-	        });
-	        selectedPages = _.filter(this.state.allFacebookPages, function (page) {
-	          return selectedIds.indexOf(page.id) >= 0;
-	        });
-	      }
-
 	      return _react2.default.createElement(
 	        'div',
-	        null,
-	        selectedPages.length > 0 ? _react2.default.createElement(
-	          'div',
-	          null,
-	          _react2.default.createElement(
-	            'h4',
-	            null,
-	            'Your Pages'
-	          ),
-	          _react2.default.createElement(
-	            'ul',
-	            { style: { listStyle: 'none' } },
-	            selectedPages.map(function (p, k) {
-	              return _react2.default.createElement(
-	                'li',
-	                null,
-	                _react2.default.createElement(
-	                  TSVerticalCenter,
-	                  { style: { height: 54 } },
-	                  _react2.default.createElement('img', {
-	                    style: {
-	                      margin: '0px 6px 0px 6px',
-	                      width: 48
-	                    },
-	                    src: p.pictureUrl }),
-	                  _react2.default.createElement(
-	                    'div',
-	                    { style: { display: 'inline' } },
-	                    p.name
-	                  )
-	                )
-	              );
-	            })
-	          )
-	        ) : _react2.default.createElement(
-	          'div',
-	          null,
-	          'You have connected 0 Facebook pages for TinyShow to pull events from.'
+	        {
+	          style: {
+	            width: '100%',
+	            padding: '12px 60px 12px 60px',
+	            backgroundColor: '#222',
+	            margin: 0
+	          } },
+	        this.props.children
+	      );
+	    }
+	  }]);
+
+	  return TSTopNavBar;
+	}(_react2.default.Component);
+
+	module.exports = TSTopNavBar;
+
+/***/ },
+/* 163 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var TSStyle = __webpack_require__(164);
+
+	var TSBoostBranding = function (_React$Component) {
+	  _inherits(TSBoostBranding, _React$Component);
+
+	  function TSBoostBranding() {
+	    _classCallCheck(this, TSBoostBranding);
+
+	    return _possibleConstructorReturn(this, (TSBoostBranding.__proto__ || Object.getPrototypeOf(TSBoostBranding)).apply(this, arguments));
+	  }
+
+	  _createClass(TSBoostBranding, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        { style: { fontSize: 34 } },
+	        _react2.default.createElement(
+	          'span',
+	          { style: { fontFamily: 'HelveticaNeue-Thin' } },
+	          'Tiny'
 	        ),
-	        this.props.user.get_events_from_user_fb_account && _react2.default.createElement(
-	          'div',
+	        _react2.default.createElement(
+	          'span',
 	          null,
-	          'Your user account is setup for TinyShow to pull events from.'
+	          'SHOW'
+	        ),
+	        _react2.default.createElement(
+	          'span',
+	          {
+	            style: {
+	              fontFamily: 'HelveticaNeue',
+	              marginLeft: 20,
+	              color: TSStyle.pink
+	            } },
+	          _react2.default.createElement('i', {
+	            style: { marginRight: 2 },
+	            className: 'fa fa-bolt',
+	            'aria-hidden': 'true' }),
+	          'boost'
 	        )
 	      );
 	    }
 	  }]);
 
-	  return TSUserSettings;
+	  return TSBoostBranding;
 	}(_react2.default.Component);
 
-	module.exports = TSUserSettings;
+	module.exports = TSBoostBranding;
 
 /***/ },
-/* 163 */
+/* 164 */
+/***/ function(module, exports) {
+
+	var TSStyle = {
+	  pink: '#FF0089',
+	  lightBlue: '#00A1E4',
+	  darkBlue: '#26499f',
+	  green: '#00F0B5',
+	  white: '#ffffff',
+	};
+
+	module.exports = TSStyle;
+
+
+/***/ },
+/* 165 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var TSCreatorStats = __webpack_require__(166);
+	var TSCreatorAccountForm = __webpack_require__(170);
+	var TSCreatorEventSourcesForm = __webpack_require__(171);
+	var TSTabbedNavigation = __webpack_require__(174);
+
+	var TSCreatorsDashboard = function (_React$Component) {
+	  _inherits(TSCreatorsDashboard, _React$Component);
+
+	  function TSCreatorsDashboard() {
+	    _classCallCheck(this, TSCreatorsDashboard);
+
+	    return _possibleConstructorReturn(this, (TSCreatorsDashboard.__proto__ || Object.getPrototypeOf(TSCreatorsDashboard)).apply(this, arguments));
+	  }
+
+	  _createClass(TSCreatorsDashboard, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        TSTabbedNavigation,
+	        null,
+	        _react2.default.createElement(TSCreatorStats, { title: 'Home', user: this.props.currentUser }),
+	        _react2.default.createElement(TSCreatorAccountForm, { title: 'Account Settings', user: this.props.currentUser }),
+	        _react2.default.createElement(TSCreatorEventSourcesForm, { title: 'Event Sources', user: this.props.currentUser })
+	      );
+	    }
+	  }]);
+
+	  return TSCreatorsDashboard;
+	}(_react2.default.Component);
+
+	module.exports = TSCreatorsDashboard;
+
+/***/ },
+/* 166 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var TSProfileSpot = __webpack_require__(167);
+
+	var TSCreatorStats = function (_React$Component) {
+	  _inherits(TSCreatorStats, _React$Component);
+
+	  function TSCreatorStats() {
+	    _classCallCheck(this, TSCreatorStats);
+
+	    return _possibleConstructorReturn(this, (TSCreatorStats.__proto__ || Object.getPrototypeOf(TSCreatorStats)).apply(this, arguments));
+	  }
+
+	  _createClass(TSCreatorStats, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        null,
+	        _react2.default.createElement(TSProfileSpot, { user: this.props.user }),
+	        _react2.default.createElement(
+	          'ul',
+	          { style: { padding: 0, marginTop: 10 } },
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'You have x pages connected to TinyShow Boost'
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'TinyShow has boosted 17 of your events'
+	          )
+	        )
+	      );
+	    }
+	  }]);
+
+	  return TSCreatorStats;
+	}(_react2.default.Component);
+
+	module.exports = TSCreatorStats;
+
+/***/ },
+/* 167 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var TSVerticalCenter = __webpack_require__(168);
+	var TSStyle = __webpack_require__(164);
+
+	var ProfileIconFacebook = function (_React$Component) {
+	  _inherits(ProfileIconFacebook, _React$Component);
+
+	  function ProfileIconFacebook() {
+	    _classCallCheck(this, ProfileIconFacebook);
+
+	    return _possibleConstructorReturn(this, (ProfileIconFacebook.__proto__ || Object.getPrototypeOf(ProfileIconFacebook)).apply(this, arguments));
+	  }
+
+	  _createClass(ProfileIconFacebook, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        'div',
+	        {
+	          style: TSHelpers.mergeObj({
+	            backgroundColor: TSStyle.darkBlue,
+	            width: 20,
+	            height: 20,
+	            borderRadius: 10,
+	            border: '1px solid #ffffff',
+	            display: 'flex',
+	            alignItems: 'center',
+	            justifyContent: 'center'
+	          }, this.props.style) },
+	        _react2.default.createElement('i', {
+	          className: 'fa fa-facebook',
+	          ariaHidden: 'true',
+	          style: { fontSize: 10 } })
+	      );
+	    }
+	  }]);
+
+	  return ProfileIconFacebook;
+	}(_react2.default.Component);
+
+	var TSProfileSpot = function (_React$Component2) {
+	  _inherits(TSProfileSpot, _React$Component2);
+
+	  function TSProfileSpot() {
+	    _classCallCheck(this, TSProfileSpot);
+
+	    return _possibleConstructorReturn(this, (TSProfileSpot.__proto__ || Object.getPrototypeOf(TSProfileSpot)).apply(this, arguments));
+	  }
+
+	  _createClass(TSProfileSpot, [{
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
+	        TSVerticalCenter,
+	        null,
+	        _react2.default.createElement(
+	          'div',
+	          {
+	            style: {
+	              position: 'relative',
+	              width: 52,
+	              height: 52
+	            } },
+	          _react2.default.createElement('img', {
+	            style: {
+	              position: 'absolute',
+	              top: 0,
+	              left: 0,
+	              borderRadius: 25
+	            },
+	            src: this.props.user.pictureUrl
+	          }),
+	          _react2.default.createElement(ProfileIconFacebook, {
+	            style: {
+	              position: 'absolute',
+	              bottom: 0,
+	              right: 0
+	            }
+	          })
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          {
+	            style: {
+	              color: TSStyle.green,
+	              textTransform: 'uppercase',
+	              paddingLeft: 10
+	            } },
+	          this.props.user.firstName
+	        )
+	      );
+	    }
+	  }]);
+
+	  return TSProfileSpot;
+	}(_react2.default.Component);
+
+	module.exports = TSProfileSpot;
+
+/***/ },
+/* 168 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20273,7 +20572,7 @@
 
 	var _react2 = _interopRequireDefault(_react);
 
-	var _TSHelpers = __webpack_require__(164);
+	var _TSHelpers = __webpack_require__(169);
 
 	var _TSHelpers2 = _interopRequireDefault(_TSHelpers);
 
@@ -20315,7 +20614,7 @@
 	module.exports = TSVerticalCenter;
 
 /***/ },
-/* 164 */
+/* 169 */
 /***/ function(module, exports) {
 
 	TSHelpers = {
@@ -20338,7 +20637,7 @@
 
 
 /***/ },
-/* 165 */
+/* 170 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20361,45 +20660,41 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var TSVerticalCenter = __webpack_require__(163);
+	var TSStyle = __webpack_require__(164);
 
-	var TSUserSettingsEdit = function (_React$Component) {
-	  _inherits(TSUserSettingsEdit, _React$Component);
+	var TSCreatorAccountForm = function (_React$Component) {
+	  _inherits(TSCreatorAccountForm, _React$Component);
 
-	  function TSUserSettingsEdit(props) {
-	    _classCallCheck(this, TSUserSettingsEdit);
+	  function TSCreatorAccountForm(props) {
+	    _classCallCheck(this, TSCreatorAccountForm);
 
-	    var _this = _possibleConstructorReturn(this, (TSUserSettingsEdit.__proto__ || Object.getPrototypeOf(TSUserSettingsEdit)).call(this, props));
+	    var _this = _possibleConstructorReturn(this, (TSCreatorAccountForm.__proto__ || Object.getPrototypeOf(TSCreatorAccountForm)).call(this, props));
 
 	    _this.state = {
-	      loaded: false,
-	      facebookPages: []
+	      data: {
+	        firstName: _this.props.user.firstName,
+	        lastName: _this.props.user.lastName,
+	        email: _this.props.user.email,
+	        phone: typeof _this.props.user.phone === 'undefined' ? '' : _this.props.user.phone
+	      }
 	    };
-	    _this.onSubmit = _this.onSubmit.bind(_this);
 	    return _this;
 	  }
 
-	  _createClass(TSUserSettingsEdit, [{
-	    key: 'componentDidMount',
-	    value: function componentDidMount() {
-	      var _this2 = this;
-
-	      TinyShowFacebookApi.getPagesList(function (facebookPages) {
-	        _this2.setState({ loaded: true, facebookPages: facebookPages });
-	      });
-	    }
-	  }, {
+	  _createClass(TSCreatorAccountForm, [{
 	    key: 'onSubmit',
 	    value: function onSubmit(e) {
+	      var _this2 = this;
+
 	      e.preventDefault();
-	      var form = _reactDom2.default.findDOMNode(this.refs.confirmForm);
+	      var form = _reactDom2.default.findDOMNode(this.refs.accountForm);
 	      $.ajax({
 	        url: '/users',
 	        data: $(form).serialize(),
 	        type: 'POST',
 	        dataType: 'json',
 	        success: function success(response) {
-	          console.log(response);
+	          _this2.props.onSettingsSaved(response);
 	        },
 	        error: function error(xhr, textStatus, errorThrown) {
 	          console.log(errorThrown);
@@ -20410,178 +20705,302 @@
 	    key: 'render',
 	    value: function render() {
 	      return _react2.default.createElement(
+	        'form',
+	        {
+	          ref: 'accountForm',
+	          method: 'POST',
+	          onSubmit: this.onSubmit },
+	        _react2.default.createElement(
+	          'div',
+	          {
+	            style: {
+	              color: TSStyle.green,
+	              marginBottom: 10,
+	              fontSize: 20
+	            } },
+	          'ACCOUNT SETTINGS'
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'form-group' },
+	          _react2.default.createElement(
+	            'label',
+	            { htmlFor: 'firstName' },
+	            'First Name'
+	          ),
+	          _react2.default.createElement('input', {
+	            id: 'firstName',
+	            name: 'user[first_name]',
+	            defaultValue: this.state.data.firstName,
+	            type: 'text',
+	            className: 'form-control',
+	            placeholder: 'First Name' })
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'form-group' },
+	          _react2.default.createElement(
+	            'label',
+	            { htmlFor: 'lastName' },
+	            'Last Name'
+	          ),
+	          _react2.default.createElement('input', {
+	            id: 'lastName',
+	            name: 'user[last_name]',
+	            defaultValue: this.state.data.lastName,
+	            type: 'text',
+	            className: 'form-control',
+	            placeholder: 'Last Name' })
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'form-group' },
+	          _react2.default.createElement(
+	            'label',
+	            { htmlFor: 'email' },
+	            'Email'
+	          ),
+	          _react2.default.createElement('input', {
+	            id: 'email',
+	            name: 'user[email]',
+	            defaultValue: this.state.data.email,
+	            type: 'email',
+	            className: 'form-control',
+	            ariaDescribedby: 'emailHelp',
+	            placeholder: 'Email' }),
+	          _react2.default.createElement(
+	            'small',
+	            { id: 'emailHelp', className: 'form-text text-muted' },
+	            'We\'ll never share your email with anyone else.'
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'form-group' },
+	          _react2.default.createElement(
+	            'label',
+	            { htmlFor: 'phone' },
+	            'Phone'
+	          ),
+	          _react2.default.createElement('input', {
+	            id: 'phone',
+	            name: 'user[phone]',
+	            defaultValue: this.state.data.phone,
+	            type: 'phone',
+	            className: 'form-control',
+	            ariaDescribedby: 'phoneHelp',
+	            placeholder: 'Phone' }),
+	          _react2.default.createElement(
+	            'small',
+	            { id: 'phoneHelp', className: 'form-text text-muted' },
+	            'It\'s good to have another contact method if there are problems with your account.'
+	          )
+	        ),
+	        this.props.children,
+	        _react2.default.createElement(
+	          'button',
+	          { type: 'submit', className: 'btn btn-default' },
+	          'Save'
+	        )
+	      );
+	    }
+	  }]);
+
+	  return TSCreatorAccountForm;
+	}(_react2.default.Component);
+
+	module.exports = TSCreatorAccountForm;
+
+/***/ },
+/* 171 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	var _reactDom = __webpack_require__(158);
+
+	var _reactDom2 = _interopRequireDefault(_reactDom);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var TSStyle = __webpack_require__(164);
+	var TSFacebookHelpers = __webpack_require__(172);
+	var TSPageList = __webpack_require__(173);
+	var TSVerticalCenter = __webpack_require__(168);
+
+	var TSCreatorEventSourcesForm = function (_React$Component) {
+	  _inherits(TSCreatorEventSourcesForm, _React$Component);
+
+	  function TSCreatorEventSourcesForm(props) {
+	    _classCallCheck(this, TSCreatorEventSourcesForm);
+
+	    var _this = _possibleConstructorReturn(this, (TSCreatorEventSourcesForm.__proto__ || Object.getPrototypeOf(TSCreatorEventSourcesForm)).call(this, props));
+
+	    _this.state = {
+	      loaded: false,
+	      facebookPages: [],
+	      get_events_from_user_fb_account: typeof _this.props.user.get_events_from_user_fb_account === 'undefined' ? false : _this.props.user.get_events_from_user_fb_account
+	    };
+	    _this.onSubmit = _this.onSubmit.bind(_this);
+	    return _this;
+	  }
+
+	  _createClass(TSCreatorEventSourcesForm, [{
+	    key: 'onSubmit',
+	    value: function onSubmit(e) {
+	      var _this2 = this;
+
+	      e.preventDefault();
+	      var form = _reactDom2.default.findDOMNode(this.refs.eventSourcesForm);
+	      $.ajax({
+	        url: '/users',
+	        data: $(form).serialize(),
+	        type: 'POST',
+	        dataType: 'json',
+	        success: function success(response) {
+	          _this2.props.onSettingsSaved(response);
+	        },
+	        error: function error(xhr, textStatus, errorThrown) {
+	          console.log(errorThrown);
+	        }
+	      });
+	    }
+	  }, {
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      var _this3 = this;
+
+	      TSFacebookHelpers.getPagesList(function (facebookPages) {
+	        _this3.setState({ loaded: true, facebookPages: facebookPages });
+	      });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      return _react2.default.createElement(
 	        'div',
 	        null,
 	        this.state.loaded && _react2.default.createElement(
-	          'div',
-	          null,
+	          'form',
+	          {
+	            ref: 'eventSourcesForm',
+	            method: 'POST',
+	            onSubmit: this.onSubmit },
 	          _react2.default.createElement(
 	            'div',
-	            { style: { textTransform: 'uppercase', fontSize: 20 } },
-	            'Please confirm your information'
-	          ),
-	          _react2.default.createElement(
-	            'div',
-	            null,
-	            '*We review every account so please ensure the email below is correct. Phone helps in case we have trouble reaching you via email.'
-	          ),
-	          _react2.default.createElement(
-	            'form',
 	            {
-	              ref: 'confirmForm',
-	              method: 'POST',
-	              onSubmit: this.onSubmit,
-	              style: { marginTop: 20 } },
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'form-group' },
-	              _react2.default.createElement(
-	                'label',
-	                { htmlFor: 'firstName' },
-	                'First Name'
-	              ),
-	              _react2.default.createElement('input', {
-	                id: 'firstName',
-	                name: 'user[first_name]',
-	                defaultValue: this.props.user.firstName,
-	                type: 'text',
-	                className: 'form-control',
-	                placeholder: 'First Name' })
-	            ),
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'form-group' },
-	              _react2.default.createElement(
-	                'label',
-	                { htmlFor: 'lastName' },
-	                'Last Name'
-	              ),
-	              _react2.default.createElement('input', {
-	                id: 'lastName',
-	                name: 'user[last_name]',
-	                defaultValue: this.props.user.lastName,
-	                type: 'text',
-	                className: 'form-control',
-	                placeholder: 'Last Name' })
-	            ),
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'form-group' },
-	              _react2.default.createElement(
-	                'label',
-	                { htmlFor: 'email' },
-	                'Email address'
-	              ),
-	              _react2.default.createElement('input', {
-	                id: 'email',
-	                name: 'user[email]',
-	                defaultValue: this.props.user.email,
-	                type: 'email',
-	                className: 'form-control',
-	                placeholder: 'Email' })
-	            ),
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'form-group' },
-	              _react2.default.createElement(
-	                'label',
-	                { htmlFor: 'phone' },
-	                'Phone'
-	              ),
-	              _react2.default.createElement('input', {
-	                id: 'phone',
-	                name: 'user[phone]',
-	                defaultValue: this.props.user.phone,
-	                type: 'phone',
-	                className: 'form-control',
-	                placeholder: 'Phone' })
-	            ),
+	              style: {
+	                color: TSStyle.green,
+	                marginBottom: 10,
+	                fontSize: 20
+	              } },
+	            'EVENT SOURCES'
+	          ),
+	          _react2.default.createElement(
+	            TSVerticalCenter,
+	            { style: { height: 54 } },
 	            _react2.default.createElement(
 	              'label',
 	              null,
-	              'Where should we pull events from?'
-	            ),
-	            _react2.default.createElement(
-	              TSVerticalCenter,
-	              { style: { height: 54 }, className: 'checkbox' },
+	              _react2.default.createElement('input', {
+	                defaultChecked: this.state.get_events_from_user_fb_account,
+	                name: 'user[get_events_from_user_fb_account]',
+	                value: 'true',
+	                type: 'checkbox' }),
 	              _react2.default.createElement(
-	                'label',
-	                null,
-	                _react2.default.createElement('input', {
-	                  name: 'user[get_events_from_user_fb_account]',
-	                  value: 'true',
-	                  type: 'checkbox' }),
-	                _react2.default.createElement(
-	                  'div',
-	                  { style: { display: 'inline' } },
-	                  'Pull events from my user account'
-	                )
+	                'div',
+	                { style: { display: 'inline', margin: '0px 10px 0px 10px' } },
+	                'Pull events from my user account'
 	              )
-	            ),
-	            _react2.default.createElement(
-	              'div',
-	              null,
-	              'Select pages:'
-	            ),
-	            _react2.default.createElement(
-	              'ul',
-	              { style: { listStyle: 'none' } },
-	              this.state.facebookPages.map(function (p, k) {
-	                _react2.default.createElement(
-	                  'li',
-	                  { key: k },
-	                  _react2.default.createElement(
-	                    TSVerticalCenter,
-	                    { style: { height: 54 }, className: 'checkbox' },
-	                    _react2.default.createElement(
-	                      'label',
-	                      null,
-	                      _react2.default.createElement('input', {
-	                        name: 'facebookPages[' + p.id + ']',
-	                        value: p.originalPayloadJSON,
-	                        type: 'checkbox' }),
-	                      _react2.default.createElement('img', {
-	                        style: {
-	                          margin: '0px 6px 0px 6px',
-	                          width: 48
-	                        },
-	                        src: p.pictureUrl }),
-	                      _react2.default.createElement(
-	                        'div',
-	                        { style: { display: 'inline' } },
-	                        p.name
-	                      )
-	                    )
-	                  )
-	                );
-	              })
-	            ),
-	            _react2.default.createElement('input', {
-	              type: 'hidden',
-	              name: 'user[facebook_graph_payload]',
-	              value: this.props.user.originalPayloadJSON() }),
-	            _react2.default.createElement('input', {
-	              type: 'hidden',
-	              name: 'user[facebook_access_token]',
-	              value: this.props.user.accessToken }),
-	            _react2.default.createElement(
-	              'button',
-	              { type: 'submit', className: 'btn btn-default' },
-	              'Confirm'
 	            )
+	          ),
+	          _react2.default.createElement(TSPageList, {
+	            pages: this.state.facebookPages,
+	            title: 'Select your facebook pages that have events:',
+	            withCheckbox: 'true'
+	          }),
+	          _react2.default.createElement(
+	            'button',
+	            { type: 'submit', className: 'btn btn-default' },
+	            'Save'
 	          )
+	        ),
+	        !this.state.loaded && _react2.default.createElement(
+	          'div',
+	          null,
+	          'Loading Facebook Pages...'
 	        )
 	      );
 	    }
 	  }]);
 
-	  return TSUserSettingsEdit;
+	  return TSCreatorEventSourcesForm;
 	}(_react2.default.Component);
 
-	module.exports = TSUserSettingsEdit;
+	module.exports = TSCreatorEventSourcesForm;
 
 /***/ },
-/* 166 */
+/* 172 */
+/***/ function(module, exports) {
+
+	var FACEBOOK_USER_FIELDS = [
+	  'email',
+	  'name',
+	  'first_name',
+	  'last_name',
+	  'age_range',
+	  'birthday',
+	  'gender',
+	  'hometown',
+	  'interested_in',
+	  'locale',
+	  'location',
+	  'relationship_status',
+	];
+
+	var TSFacebookHelpers = {
+	  getPagesList: (success) => {    
+	    FB.api('/me/accounts', (response) => {
+	      var facebookPages = response.data.map((pageJSON) => {
+	        return new FacebookPage(pageJSON);
+	      })
+	      success(facebookPages);
+	    });
+	  },
+	  getCurrentUserProfile: (success) => {
+	    FB.api('/me?fields='+FACEBOOK_USER_FIELDS.join(','), (response) => {
+	      success(new FacebookUser(response, FB.getAuthResponse()['accessToken']));
+	    });
+	  },
+	  getGrantedPermissions: (success) => {
+	    FB.api('/me/permissions', (response) => {
+	      var gantedPermissions = [];
+	      response.data.forEach((permission) => {
+	        if (permission['status'] == 'granted')
+	          gantedPermissions.push(permission['permission']);
+	      });
+	      success(gantedPermissions);
+	    });
+	  },
+	};
+
+	module.exports = TSFacebookHelpers;
+
+
+/***/ },
+/* 173 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -20600,61 +21019,199 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var TSBoostBranding = __webpack_require__(167);
-	var TSProfileSpot = __webpack_require__(168);
+	var TSVerticalCenter = __webpack_require__(168);
 
-	var TSNavigation = function (_React$Component) {
-	  _inherits(TSNavigation, _React$Component);
+	var TSPageList = function (_React$Component) {
+	  _inherits(TSPageList, _React$Component);
 
-	  function TSNavigation() {
-	    _classCallCheck(this, TSNavigation);
+	  function TSPageList() {
+	    _classCallCheck(this, TSPageList);
 
-	    return _possibleConstructorReturn(this, (TSNavigation.__proto__ || Object.getPrototypeOf(TSNavigation)).apply(this, arguments));
+	    return _possibleConstructorReturn(this, (TSPageList.__proto__ || Object.getPrototypeOf(TSPageList)).apply(this, arguments));
 	  }
 
-	  _createClass(TSNavigation, [{
+	  _createClass(TSPageList, [{
+	    key: 'renderImage',
+	    value: function renderImage(page) {
+	      return _react2.default.createElement('img', {
+	        style: {
+	          margin: '0px 10px 0px 10px',
+	          width: 48
+	        },
+	        src: page.pictureUrl
+	      });
+	    }
+	  }, {
+	    key: 'renderPageName',
+	    value: function renderPageName(page) {
+	      return _react2.default.createElement(
+	        'div',
+	        { style: { display: 'inline' } },
+	        page.name
+	      );
+	    }
+	  }, {
+	    key: 'renderListContent',
+	    value: function renderListContent(page) {
+	      if (this.props.withCheckbox) {
+	        return _react2.default.createElement(
+	          TSVerticalCenter,
+	          { style: { height: 54 }, className: 'checkbox' },
+	          _react2.default.createElement(
+	            'label',
+	            null,
+	            _react2.default.createElement('input', {
+	              name: 'facebookPages[' + page.id + ']',
+	              value: page.originalPayloadJSON,
+	              type: 'checkbox' }),
+	            this.renderImage(page),
+	            this.renderPageName(page)
+	          )
+	        );
+	      } else {
+	        return _react2.default.createElement(
+	          TSVerticalCenter,
+	          { style: { height: 54 } },
+	          this.renderImage(page),
+	          this.renderPageName(page)
+	        );
+	      }
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
+	      var _this2 = this;
+
+	      return _react2.default.createElement(
+	        'div',
+	        null,
+	        _react2.default.createElement(
+	          'label',
+	          null,
+	          this.props.title
+	        ),
+	        _react2.default.createElement(
+	          'ul',
+	          { style: { listStyle: 'none', marginTop: 6, padding: 0 } },
+	          this.props.pages.map(function (p, k) {
+	            return _react2.default.createElement(
+	              'li',
+	              { key: k },
+	              _this2.renderListContent(p)
+	            );
+	          })
+	        )
+	      );
+	    }
+	  }]);
+
+	  return TSPageList;
+	}(_react2.default.Component);
+
+	module.exports = TSPageList;
+
+/***/ },
+/* 174 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _react = __webpack_require__(1);
+
+	var _react2 = _interopRequireDefault(_react);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var TSNavLink = __webpack_require__(175);
+
+	var TSTabbedNavigation = function (_React$Component) {
+	  _inherits(TSTabbedNavigation, _React$Component);
+
+	  function TSTabbedNavigation(props) {
+	    _classCallCheck(this, TSTabbedNavigation);
+
+	    var _this = _possibleConstructorReturn(this, (TSTabbedNavigation.__proto__ || Object.getPrototypeOf(TSTabbedNavigation)).call(this, props));
+
+	    _this.state = { selectedIndex: 0 };
+	    _this.selectIndex = _this.selectIndex.bind(_this);
+	    return _this;
+	  }
+
+	  _createClass(TSTabbedNavigation, [{
+	    key: 'selectIndex',
+	    value: function selectIndex(i) {
+	      this.setState({ selectedIndex: i });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _this2 = this;
+
 	      return _react2.default.createElement(
 	        'div',
 	        {
-	          className: 'row',
 	          style: {
-	            width: '100%',
-	            padding: '12px 60px 12px 60px',
-	            backgroundColor: '#222',
-	            margin: 0
+	            display: 'flex',
+	            width: '100%'
 	          } },
 	        _react2.default.createElement(
-	          'div',
-	          { className: 'col-lg-10 col-md-10' },
-	          _react2.default.createElement(TSBoostBranding, null)
+	          'ul',
+	          { className: 'nav nav-pills nav-stacked' },
+	          this.props.children.map(function (component, k) {
+	            return _react2.default.createElement(
+	              'li',
+	              { key: k, role: 'presentation' },
+	              _react2.default.createElement(
+	                TSNavLink,
+	                {
+	                  selected: _this2.state.selectedIndex == k,
+	                  onClick: function onClick() {
+	                    _this2.selectIndex(k);
+	                  } },
+	                component.props.title
+	              )
+	            );
+	          })
 	        ),
 	        _react2.default.createElement(
 	          'div',
-	          { className: 'col-lg-2 col-md-2' },
-	          this.props.currentUser && _react2.default.createElement(TSProfileSpot, { user: this.props.currentUser })
+	          { style: { paddingLeft: 40 } },
+	          this.props.children[this.state.selectedIndex]
 	        )
 	      );
 	    }
 	  }]);
 
-	  return TSNavigation;
+	  return TSTabbedNavigation;
 	}(_react2.default.Component);
 
-	module.exports = TSNavigation;
+	module.exports = TSTabbedNavigation;
 
 /***/ },
-/* 167 */
+/* 175 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
+
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	var _react = __webpack_require__(1);
 
 	var _react2 = _interopRequireDefault(_react);
+
+	var _TSNavLink = __webpack_require__(176);
+
+	var _TSNavLink2 = _interopRequireDefault(_TSNavLink);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -20664,109 +21221,438 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	var TSBoostBranding = function (_React$Component) {
-	  _inherits(TSBoostBranding, _React$Component);
+	var classNames = __webpack_require__(180);
 
-	  function TSBoostBranding() {
-	    _classCallCheck(this, TSBoostBranding);
+	var TSNavLink = function (_React$Component) {
+	  _inherits(TSNavLink, _React$Component);
 
-	    return _possibleConstructorReturn(this, (TSBoostBranding.__proto__ || Object.getPrototypeOf(TSBoostBranding)).apply(this, arguments));
+	  function TSNavLink() {
+	    _classCallCheck(this, TSNavLink);
+
+	    return _possibleConstructorReturn(this, (TSNavLink.__proto__ || Object.getPrototypeOf(TSNavLink)).apply(this, arguments));
 	  }
 
-	  _createClass(TSBoostBranding, [{
+	  _createClass(TSNavLink, [{
 	    key: 'render',
 	    value: function render() {
 	      return _react2.default.createElement(
-	        'div',
-	        { style: { fontSize: 34 } },
-	        _react2.default.createElement(
-	          'span',
-	          { style: { fontFamily: 'HelveticaNeue-Thin' } },
-	          'Tiny'
-	        ),
-	        _react2.default.createElement(
-	          'span',
-	          null,
-	          'SHOW'
-	        ),
-	        _react2.default.createElement(
-	          'span',
-	          {
-	            className: 'pink',
-	            style: {
-	              fontFamily: 'HelveticaNeue',
-	              marginLeft: 20
-	            } },
-	          _react2.default.createElement('i', {
-	            style: { marginRight: 2 },
-	            className: 'fa fa-bolt',
-	            'aria-hidden': 'true' }),
-	          'boost'
-	        )
+	        'a',
+	        _extends({}, this.props, {
+	          className: classNames(_TSNavLink2.default.navLink, this.props.selected ? _TSNavLink2.default.selected : null) }),
+	        this.props.children
 	      );
 	    }
 	  }]);
 
-	  return TSBoostBranding;
+	  return TSNavLink;
 	}(_react2.default.Component);
 
-	module.exports = TSBoostBranding;
+	module.exports = TSNavLink;
 
 /***/ },
-/* 168 */
+/* 176 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	// style-loader: Adds some css to the DOM by adding a <style> tag
 
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	// load the styles
+	var content = __webpack_require__(177);
+	if(typeof content === 'string') content = [[module.id, content, '']];
+	// add the styles to the DOM
+	var update = __webpack_require__(179)(content, {});
+	if(content.locals) module.exports = content.locals;
+	// Hot Module Replacement
+	if(false) {
+		// When the styles change, update the <style> tags
+		if(!content.locals) {
+			module.hot.accept("!!./../../../node_modules/css-loader/index.js?{\"modules\":true,\"localIdentName\":\"[name]__[local]___[hash:base64:5]\"}!./TSNavLink.css", function() {
+				var newContent = require("!!./../../../node_modules/css-loader/index.js?{\"modules\":true,\"localIdentName\":\"[name]__[local]___[hash:base64:5]\"}!./TSNavLink.css");
+				if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+				update(newContent);
+			});
+		}
+		// When the module is disposed, remove the <style> tags
+		module.hot.dispose(function() { update(); });
+	}
 
-	var _react = __webpack_require__(1);
+/***/ },
+/* 177 */
+/***/ function(module, exports, __webpack_require__) {
 
-	var _react2 = _interopRequireDefault(_react);
+	exports = module.exports = __webpack_require__(178)();
+	// imports
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	// module
+	exports.push([module.id, ".TSNavLink__navLink___1xJ6u {\n  white-space: nowrap;\n  padding: 4px 12px 4px 60px;\n  display: block;\n  text-decoration: none;\n  color: rgb(0,240,181);\n  cursor: pointer;\n}\n\n.TSNavLink__navLink___1xJ6u.TSNavLink__selected___1l-8Y {\n  background-color: rgba(0,240,181,0.5);\n  color: #eeeeee;\n}\n\n.TSNavLink__navLink___1xJ6u:hover {\n  color: #eeeeee;\n}\n\n.TSNavLink__navLink___1xJ6u:visited {\n  text-decoration: none;\n}\n\n.TSNavLink__navLink___1xJ6u:active {\n  text-decoration: none;\n}\n\n.TSNavLink__navLink___1xJ6u:link {\n  text-decoration: none;\n}\n", ""]);
 
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	// exports
+	exports.locals = {
+		"navLink": "TSNavLink__navLink___1xJ6u",
+		"selected": "TSNavLink__selected___1l-8Y"
+	};
 
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+/***/ },
+/* 178 */
+/***/ function(module, exports) {
 
-	var TSVerticalCenter = __webpack_require__(163);
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	// css base code, injected by the css-loader
+	module.exports = function() {
+		var list = [];
 
-	var TSProfileSpot = function (_React$Component) {
-	  _inherits(TSProfileSpot, _React$Component);
+		// return the list of modules as css string
+		list.toString = function toString() {
+			var result = [];
+			for(var i = 0; i < this.length; i++) {
+				var item = this[i];
+				if(item[2]) {
+					result.push("@media " + item[2] + "{" + item[1] + "}");
+				} else {
+					result.push(item[1]);
+				}
+			}
+			return result.join("");
+		};
 
-	  function TSProfileSpot() {
-	    _classCallCheck(this, TSProfileSpot);
+		// import a list of modules into the list
+		list.i = function(modules, mediaQuery) {
+			if(typeof modules === "string")
+				modules = [[null, modules, ""]];
+			var alreadyImportedModules = {};
+			for(var i = 0; i < this.length; i++) {
+				var id = this[i][0];
+				if(typeof id === "number")
+					alreadyImportedModules[id] = true;
+			}
+			for(i = 0; i < modules.length; i++) {
+				var item = modules[i];
+				// skip already imported module
+				// this implementation is not 100% perfect for weird media query combinations
+				//  when a module is imported multiple times with different media queries.
+				//  I hope this will never occur (Hey this way we have smaller bundles)
+				if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+					if(mediaQuery && !item[2]) {
+						item[2] = mediaQuery;
+					} else if(mediaQuery) {
+						item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+					}
+					list.push(item);
+				}
+			}
+		};
+		return list;
+	};
 
-	    return _possibleConstructorReturn(this, (TSProfileSpot.__proto__ || Object.getPrototypeOf(TSProfileSpot)).apply(this, arguments));
-	  }
 
-	  _createClass(TSProfileSpot, [{
-	    key: 'render',
-	    value: function render() {
-	      return _react2.default.createElement(
-	        TSVerticalCenter,
-	        null,
-	        _react2.default.createElement(
-	          'div',
-	          { style: { fontSize: 18, paddingRight: 4 } },
-	          _react2.default.createElement(
-	            'span',
-	            { className: 'blue' },
-	            this.props.user.firstName
-	          )
-	        ),
-	        _react2.default.createElement('img', { src: this.props.user.pictureUrl })
-	      );
-	    }
-	  }]);
+/***/ },
+/* 179 */
+/***/ function(module, exports, __webpack_require__) {
 
-	  return TSProfileSpot;
-	}(_react2.default.Component);
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	var stylesInDom = {},
+		memoize = function(fn) {
+			var memo;
+			return function () {
+				if (typeof memo === "undefined") memo = fn.apply(this, arguments);
+				return memo;
+			};
+		},
+		isOldIE = memoize(function() {
+			return /msie [6-9]\b/.test(window.navigator.userAgent.toLowerCase());
+		}),
+		getHeadElement = memoize(function () {
+			return document.head || document.getElementsByTagName("head")[0];
+		}),
+		singletonElement = null,
+		singletonCounter = 0,
+		styleElementsInsertedAtTop = [];
 
-	module.exports = TSProfileSpot;
+	module.exports = function(list, options) {
+		if(false) {
+			if(typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
+		}
+
+		options = options || {};
+		// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+		// tags it will allow on a page
+		if (typeof options.singleton === "undefined") options.singleton = isOldIE();
+
+		// By default, add <style> tags to the bottom of <head>.
+		if (typeof options.insertAt === "undefined") options.insertAt = "bottom";
+
+		var styles = listToStyles(list);
+		addStylesToDom(styles, options);
+
+		return function update(newList) {
+			var mayRemove = [];
+			for(var i = 0; i < styles.length; i++) {
+				var item = styles[i];
+				var domStyle = stylesInDom[item.id];
+				domStyle.refs--;
+				mayRemove.push(domStyle);
+			}
+			if(newList) {
+				var newStyles = listToStyles(newList);
+				addStylesToDom(newStyles, options);
+			}
+			for(var i = 0; i < mayRemove.length; i++) {
+				var domStyle = mayRemove[i];
+				if(domStyle.refs === 0) {
+					for(var j = 0; j < domStyle.parts.length; j++)
+						domStyle.parts[j]();
+					delete stylesInDom[domStyle.id];
+				}
+			}
+		};
+	}
+
+	function addStylesToDom(styles, options) {
+		for(var i = 0; i < styles.length; i++) {
+			var item = styles[i];
+			var domStyle = stylesInDom[item.id];
+			if(domStyle) {
+				domStyle.refs++;
+				for(var j = 0; j < domStyle.parts.length; j++) {
+					domStyle.parts[j](item.parts[j]);
+				}
+				for(; j < item.parts.length; j++) {
+					domStyle.parts.push(addStyle(item.parts[j], options));
+				}
+			} else {
+				var parts = [];
+				for(var j = 0; j < item.parts.length; j++) {
+					parts.push(addStyle(item.parts[j], options));
+				}
+				stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
+			}
+		}
+	}
+
+	function listToStyles(list) {
+		var styles = [];
+		var newStyles = {};
+		for(var i = 0; i < list.length; i++) {
+			var item = list[i];
+			var id = item[0];
+			var css = item[1];
+			var media = item[2];
+			var sourceMap = item[3];
+			var part = {css: css, media: media, sourceMap: sourceMap};
+			if(!newStyles[id])
+				styles.push(newStyles[id] = {id: id, parts: [part]});
+			else
+				newStyles[id].parts.push(part);
+		}
+		return styles;
+	}
+
+	function insertStyleElement(options, styleElement) {
+		var head = getHeadElement();
+		var lastStyleElementInsertedAtTop = styleElementsInsertedAtTop[styleElementsInsertedAtTop.length - 1];
+		if (options.insertAt === "top") {
+			if(!lastStyleElementInsertedAtTop) {
+				head.insertBefore(styleElement, head.firstChild);
+			} else if(lastStyleElementInsertedAtTop.nextSibling) {
+				head.insertBefore(styleElement, lastStyleElementInsertedAtTop.nextSibling);
+			} else {
+				head.appendChild(styleElement);
+			}
+			styleElementsInsertedAtTop.push(styleElement);
+		} else if (options.insertAt === "bottom") {
+			head.appendChild(styleElement);
+		} else {
+			throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
+		}
+	}
+
+	function removeStyleElement(styleElement) {
+		styleElement.parentNode.removeChild(styleElement);
+		var idx = styleElementsInsertedAtTop.indexOf(styleElement);
+		if(idx >= 0) {
+			styleElementsInsertedAtTop.splice(idx, 1);
+		}
+	}
+
+	function createStyleElement(options) {
+		var styleElement = document.createElement("style");
+		styleElement.type = "text/css";
+		insertStyleElement(options, styleElement);
+		return styleElement;
+	}
+
+	function createLinkElement(options) {
+		var linkElement = document.createElement("link");
+		linkElement.rel = "stylesheet";
+		insertStyleElement(options, linkElement);
+		return linkElement;
+	}
+
+	function addStyle(obj, options) {
+		var styleElement, update, remove;
+
+		if (options.singleton) {
+			var styleIndex = singletonCounter++;
+			styleElement = singletonElement || (singletonElement = createStyleElement(options));
+			update = applyToSingletonTag.bind(null, styleElement, styleIndex, false);
+			remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true);
+		} else if(obj.sourceMap &&
+			typeof URL === "function" &&
+			typeof URL.createObjectURL === "function" &&
+			typeof URL.revokeObjectURL === "function" &&
+			typeof Blob === "function" &&
+			typeof btoa === "function") {
+			styleElement = createLinkElement(options);
+			update = updateLink.bind(null, styleElement);
+			remove = function() {
+				removeStyleElement(styleElement);
+				if(styleElement.href)
+					URL.revokeObjectURL(styleElement.href);
+			};
+		} else {
+			styleElement = createStyleElement(options);
+			update = applyToTag.bind(null, styleElement);
+			remove = function() {
+				removeStyleElement(styleElement);
+			};
+		}
+
+		update(obj);
+
+		return function updateStyle(newObj) {
+			if(newObj) {
+				if(newObj.css === obj.css && newObj.media === obj.media && newObj.sourceMap === obj.sourceMap)
+					return;
+				update(obj = newObj);
+			} else {
+				remove();
+			}
+		};
+	}
+
+	var replaceText = (function () {
+		var textStore = [];
+
+		return function (index, replacement) {
+			textStore[index] = replacement;
+			return textStore.filter(Boolean).join('\n');
+		};
+	})();
+
+	function applyToSingletonTag(styleElement, index, remove, obj) {
+		var css = remove ? "" : obj.css;
+
+		if (styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = replaceText(index, css);
+		} else {
+			var cssNode = document.createTextNode(css);
+			var childNodes = styleElement.childNodes;
+			if (childNodes[index]) styleElement.removeChild(childNodes[index]);
+			if (childNodes.length) {
+				styleElement.insertBefore(cssNode, childNodes[index]);
+			} else {
+				styleElement.appendChild(cssNode);
+			}
+		}
+	}
+
+	function applyToTag(styleElement, obj) {
+		var css = obj.css;
+		var media = obj.media;
+
+		if(media) {
+			styleElement.setAttribute("media", media)
+		}
+
+		if(styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = css;
+		} else {
+			while(styleElement.firstChild) {
+				styleElement.removeChild(styleElement.firstChild);
+			}
+			styleElement.appendChild(document.createTextNode(css));
+		}
+	}
+
+	function updateLink(linkElement, obj) {
+		var css = obj.css;
+		var sourceMap = obj.sourceMap;
+
+		if(sourceMap) {
+			// http://stackoverflow.com/a/26603875
+			css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
+		}
+
+		var blob = new Blob([css], { type: "text/css" });
+
+		var oldSrc = linkElement.href;
+
+		linkElement.href = URL.createObjectURL(blob);
+
+		if(oldSrc)
+			URL.revokeObjectURL(oldSrc);
+	}
+
+
+/***/ },
+/* 180 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
+	  Copyright (c) 2016 Jed Watson.
+	  Licensed under the MIT License (MIT), see
+	  http://jedwatson.github.io/classnames
+	*/
+	/* global define */
+
+	(function () {
+		'use strict';
+
+		var hasOwn = {}.hasOwnProperty;
+
+		function classNames () {
+			var classes = [];
+
+			for (var i = 0; i < arguments.length; i++) {
+				var arg = arguments[i];
+				if (!arg) continue;
+
+				var argType = typeof arg;
+
+				if (argType === 'string' || argType === 'number') {
+					classes.push(arg);
+				} else if (Array.isArray(arg)) {
+					classes.push(classNames.apply(null, arg));
+				} else if (argType === 'object') {
+					for (var key in arg) {
+						if (hasOwn.call(arg, key) && arg[key]) {
+							classes.push(key);
+						}
+					}
+				}
+			}
+
+			return classes.join(' ');
+		}
+
+		if (typeof module !== 'undefined' && module.exports) {
+			module.exports = classNames;
+		} else if (true) {
+			// register as 'classnames', consistent with npm package name
+			!(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function () {
+				return classNames;
+			}.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+		} else {
+			window.classNames = classNames;
+		}
+	}());
+
 
 /***/ }
 /******/ ]);

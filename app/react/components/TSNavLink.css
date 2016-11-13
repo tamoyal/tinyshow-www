@@ -1,0 +1,29 @@
+.navLink {
+  white-space: nowrap;
+  padding: 4px 12px 4px 60px;
+  display: block;
+  text-decoration: none;
+  color: rgb(0,240,181);
+  cursor: pointer;
+}
+
+.navLink.selected {
+  background-color: rgba(0,240,181,0.5);
+  color: #eeeeee;
+}
+
+.navLink:hover {
+  color: #eeeeee;
+}
+
+.navLink:visited {
+  text-decoration: none;
+}
+
+.navLink:active {
+  text-decoration: none;
+}
+
+.navLink:link {
+  text-decoration: none;
+}

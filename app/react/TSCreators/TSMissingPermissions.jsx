@@ -24,7 +24,7 @@ class TSMissingPermissions extends React.Component {
             You must grant the following permissions to connect your events to TinyShow:
           </div>
 
-          <ul id="permissions_list">
+          <ul>
             {this.props.missingPermissions.map((p, k) => {
               return (
                 <li key={k}>{p}</li>
@@ -32,23 +32,11 @@ class TSMissingPermissions extends React.Component {
             })}
           </ul>
 
-          <button
+          <TSIconButton
             onClick={this.doGrant}
-            type="button"
-            className="btn btn-default"
-            ariaLabel="Left Align"
-            style={{
-              backgroundColor: '#26499f',
-              color: 'white',
-              border: 'none',
-            }}>
-            <i
-              className="fa fa-facebook"
-              ariaHidden="true"
-              style={{marginRight: 8}}>
-            </i>
-            Grant
-          </button>
+            title="Grant"
+            fontAwesomeIconClass="fa-facebook"
+          />
         </div>
       </div>
     )

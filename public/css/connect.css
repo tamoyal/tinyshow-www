@@ -3,9 +3,9 @@ body {
   background: #111;
   color: #eee;
 }
-.blue {
-  color: #00A1E4;
+form {
+  margin: 0;
 }
-.pink {
-  color: #FF0089;
+a:hover{
+  text-decoration: none;
 }

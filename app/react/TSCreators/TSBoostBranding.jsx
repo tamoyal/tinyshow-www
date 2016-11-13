@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
 
+var TSStyle = require('../../TSStyle.js');
+
 class TSBoostBranding extends React.Component {
   render() {
     return (
@@ -7,10 +9,10 @@ class TSBoostBranding extends React.Component {
         <span style={{fontFamily: 'HelveticaNeue-Thin'}}>Tiny</span>
         <span>SHOW</span>
         <span
-          className="pink"
           style={{
             fontFamily: 'HelveticaNeue',
             marginLeft: 20,
+            color: TSStyle.pink,
           }}>
           <i
             style={{marginRight: 2}}
