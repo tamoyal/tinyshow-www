@@ -11,27 +11,21 @@ class TSCreatorAccountForm extends React.Component {
         firstName: this.props.user.firstName,
         lastName: this.props.user.lastName,
         email: this.props.user.email,
-        phone:
-          typeof this.props.user.phone === 'undefined'
-          ? '' : this.props.user.phone,
+        phone: this.props.user.phone,
       }
     };
+    this.onSubmit = this.onSubmit.bind(this);
   }
   onSubmit(e) {
-    e.preventDefault();
-    var form = ReactDOM.findDOMNode(this.refs.accountForm);
-    $.ajax({
-      url: '/users',
-      data: $(form).serialize(),
-      type: 'POST',
-      dataType: 'json',
-      success: response => {
-        this.props.onSettingsSaved(response);
+    e.preventDefault(); // TODO: do I need these?
+    TinyShowApi.updateUser(
+      $(ReactDOM.findDOMNode(this.refs.accountForm)).serialize(),
+      (response) => {
+        this.props.onSettingsSaved(new TinyShowUser(response));
       },
-      error: (xhr, textStatus, errorThrown) => {
-        console.log(errorThrown);
-      }
-    });
+      (xhr) => {
+        console.log(xhr);
+      });
   }
   render() {
     return (
@@ -39,14 +33,17 @@ class TSCreatorAccountForm extends React.Component {
         ref="accountForm"
         method="POST"
         onSubmit={this.onSubmit}>
-        <div
-          style={{
-            color: TSStyle.green,
-            marginBottom: 10,
-            fontSize: 20,
-          }}>
-          ACCOUNT SETTINGS
-        </div>
+        {this.props.title &&
+          <div
+            style={{
+              color: TSStyle.green,
+              marginBottom: 10,
+              fontSize: 20,
+              textTransform: 'uppercase',
+            }}>
+            {this.props.title}
+          </div>
+        }
 
         <div className="form-group">
           <label htmlFor="firstName">First Name</label>
@@ -100,7 +97,17 @@ class TSCreatorAccountForm extends React.Component {
           </small>
         </div>
 
-        {this.props.children}
+        <input
+          name="user[auth_token]"
+          type="hidden"
+          value={this.props.user.auth_token}
+        />
+
+        <input
+          name="user[confirm]"
+          type="hidden"
+          value="1"
+        />
 
         <button type="submit" className="btn btn-default">Save</button>
       </form>

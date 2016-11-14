@@ -15,11 +15,11 @@ class TSBoostBranding extends React.Component {
             color: TSStyle.pink,
           }}>
           <i
-            style={{marginRight: 2}}
+            style={{marginRight: 6}}
             className="fa fa-bolt"
             aria-hidden="true">
           </i>
-          boost
+          BOOST
         </span>
       </div>
     )

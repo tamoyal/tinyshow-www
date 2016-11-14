@@ -8,10 +8,11 @@ class CreateUsers < ActiveRecord::Migration[5.0]
 			t.string :facebook_id
 			t.string :facebook_access_token
 			t.string :facebook_graph_payload
+      t.datetime :confirmed_at
 			t.boolean :get_events_from_user_fb_account
 			t.timestamps
 		end
-    add_index :users, :email, unique: true
+    add_index :users, :email, unique: true, where: "(confirmed_at IS NOT NULL)"
     add_index :users, :facebook_id, unique: true
   end
 end

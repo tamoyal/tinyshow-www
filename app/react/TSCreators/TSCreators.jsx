@@ -6,13 +6,30 @@ var TSTopNavBar = require('../components/TSTopNavBar.jsx');
 var TSBoostBranding = require('./TSBoostBranding.jsx');
 var TSCreatorsDashboard = require('./TSCreatorsDashboard.jsx');
 var TSFacebookHelpers = require('../../TSFacebookHelpers.js');
+var TSHelpers = require('../../TSHelpers.js');
+var TSUserRegistration = require('./TSUserRegistration.jsx');
 var TSStyle = require('../../TSStyle.js');
+var TSData = require('../../TSData.js');
 
 class TSBoostMarketing extends React.Component {
   render() {
     return (
-      <div style={{fontSize: 16, marginTop: 8}}>
-        <span style={{color: TSStyle.pink}}>Boost</span> increases your <span style={{color: TSStyle.lightBlue}}>Facebook</span> event RSVP's by making it <u>super easy</u> for users to respond. Get setup in less than 60 seconds.
+      <div
+        style={TSHelpers.mergeObj({
+          fontSize: 16,
+        }, this.props.style)}>
+        <span
+          style={{
+            color: TSStyle.pink,
+            fontSize: 26,
+            textTransform: 'uppercase',
+          }}>
+          Boost
+        </span> increases your <span style={{color: TSStyle.lightBlue}}>facebook</span> event RSVP's:
+        <ul style={{marginBottom: 0}}>
+          <li>We encourage "interested" responses to boost your event in facebook news feeds.</li>
+          <li>We provide a seamless one tap responses in the TinyShow app.</li>
+        </ul>
       </div>
     )
   }
@@ -22,14 +39,13 @@ class TSCreators extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      curFacebookUser: null,
-      curTinyShowUser: null,
+      currentUser: null,
       missingPermissions: null,
     };
     this.checkPermissions = this.checkPermissions.bind(this);
     this.grant = this.grant.bind(this);
     this.facebookConnected = this.facebookConnected.bind(this);
-    this.onSettingsSaved = this.onSettingsSaved.bind(this);
+    this.onRegistered = this.onRegistered.bind(this);
   }
   checkPermissions() {
     TSFacebookHelpers.getGrantedPermissions(granted => {
@@ -53,41 +69,46 @@ class TSCreators extends React.Component {
   }
   facebookConnected() {
     this.checkPermissions();
-    TinyShowApi.getExistingUser((u) => {
-      if (u['id']) {
-        this.setState({curTinyShowUser: new TinyShowUser(u)});
-      } else {
-        TSFacebookHelpers.getCurrentUserProfile((facebookUser) => {
-          this.setState({curFacebookUser: facebookUser});
+    if (TSData.currentUser) {
+      this.setState({currentUser: TSData.currentUser});
+    } else {
+      TinyShowApi.login(
+        (user) => {
+          TSData.currentUser = new TinyShowUser(user);
+          this.setState({currentUser: TSData.currentUser});
+        },
+        (error) => {
+          console.log(error);
         });
-      }
-    });
+    }
   }
   hayMissingPermissions() {
     return this.state.missingPermissions != null &&
       this.state.missingPermissions.length > 0;
   }
-  onSettingsSaved(u) {
-    this.setState({curTinyShowUser: new TinyShowUser(u)});
+  onRegistered() {
+    this.setState({currentUser: TSData.currentUser});
   }
   renderRegisteredUser() {
     return (
-      <TSCreatorsDashboard currentUser={this.state.curTinyShowUser} />
+      <TSCreatorsDashboard currentUser={this.state.currentUser} />
     )
   }
   renderFacebookAuthenticatedUser() {
     if (this.hayMissingPermissions()) {
-      return
+      return  (
         <TSMissingPermissions
           missingPermissions={this.state.missingPermissions}
           onGrant={this.grant}
-        />;
+        />
+      )
     } else {
-      return
+      return  (
         <TSUserRegistration
-          curFacebookUser={this.state.curFacebookUser}
-          onSettingsSaved={this.onSettingsSaved}
-        />;
+          currentUser={this.state.currentUser}
+          onRegistered={this.onRegistered}
+        />
+      )
     }
   }
   renderUnauthenticated() {
@@ -97,10 +118,12 @@ class TSCreators extends React.Component {
   }
   render() {
     var body;
-    if (this.state.curTinyShowUser) {
-      body = this.renderRegisteredUser();
-    } else if (this.state.curFacebookUser) {
-      body = this.renderFacebookAuthenticatedUser();
+    if (this.state.currentUser) {
+      if (this.state.currentUser.confirmedAt) {
+        body = this.renderRegisteredUser();
+      } else {
+        body = this.renderFacebookAuthenticatedUser();
+      }
     } else {
       body = this.renderUnauthenticated();
     }
@@ -110,15 +133,21 @@ class TSCreators extends React.Component {
         <TSTopNavBar>
           <TSBoostBranding />
         </TSTopNavBar>
+        {(!this.state.currentUser || !this.state.currentUser.confirmedAt) &&
+          <TSBoostMarketing
+            style={{
+              paddingLeft: 60,
+              paddingRight: 40,
+              marginTop: 16,
+              width: 800,
+            }}
+          />
+        }
         <div
           style={{
-            paddingTop: 60,
-            paddingRight: 60,
+            padding: '40px 40px 40px 0px',
             width: 800,
           }}>
-          {!this.state.curTinyShowUser &&
-            <TSBoostMarketing />
-          }
           {body}
         </div>
       </div>

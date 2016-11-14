@@ -14,5 +14,9 @@ module TinyShow
 		def warn(obj)
 			debug(obj)
 		end
+
+		def error(obj)
+			debug(obj)
+		end
 	end
 end

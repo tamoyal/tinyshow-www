@@ -6,6 +6,9 @@ body {
 form {
   margin: 0;
 }
-a:hover{
+a {
+  color: #00A1E4;
+}
+a:hover {
   text-decoration: none;
 }

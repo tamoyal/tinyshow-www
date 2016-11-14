@@ -1,5 +1,16 @@
 import React, {Component} from 'react';
 
+class TSFacebookLoginButton extends React.Component {
+  render() {
+    return (
+      <a {...this.props} className="btn btn-block btn-social btn-facebook">
+        <span className="fa fa-facebook"></span>
+        Sign in with Facebook to connect your events
+      </a>
+    )
+  }
+}
+
 class TSFacebookLogin extends React.Component {
   constructor(props) {
     super(props);
@@ -66,23 +77,10 @@ class TSFacebookLogin extends React.Component {
   }
   render() {
     return (
-      <div>
+      <div style={{marginLeft: 60}}>
         {this.state.loaded &&
-          <div
-            style={{
-              padding: '16px 0px 16px 0px',
-              margin: '20px 0px 20px 0px',
-            }}>
-            <div>
-              <a
-                className="btn btn-block btn-social btn-facebook"
-                onClick={this.login}>
-                <span className="fa fa-facebook"></span> Sign in with Facebook to connect your events 
-              </a>
-            </div>
-          </div>
+          <TSFacebookLoginButton onClick={this.login} />
         }
-
         {!this.state.loaded &&
           <div>LOADING...</div>
         }

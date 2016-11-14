@@ -23,8 +23,8 @@ class TSPageList extends React.Component {
         <TSVerticalCenter style={{height: 54}} className="checkbox">
           <label>
             <input
-              name={'facebookPages['+page.id+']'}
-              value={page.originalPayloadJSON}
+              name={'facebook_pages['+page.id+']'}
+              value={page.originalPayloadJSON()}
               type="checkbox" />
             {this.renderImage(page)}
             {this.renderPageName(page)}
