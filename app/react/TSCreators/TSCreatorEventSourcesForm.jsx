@@ -29,9 +29,18 @@ class TSCreatorEventSourcesForm extends React.Component {
       });
   }
   componentDidMount() {
-    TSFacebookHelpers.getPagesList(facebookPages => {
-      this.setState({loaded: true, facebookPages: facebookPages});
-    });
+    TSFacebookHelpers.getPagesList(
+      this.props.user.facebookId,
+      facebookPages => {
+        this.setState({loaded: true, facebookPages: facebookPages});
+      },
+      error => {
+        if (error.type == "OAuthException") {
+          this.props.onAuthError();
+        } else {
+          alert(error.message);
+        }
+      });
   }
   render() {
     return (

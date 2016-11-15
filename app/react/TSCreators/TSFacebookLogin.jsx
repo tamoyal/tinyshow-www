@@ -18,6 +18,8 @@ class TSFacebookLogin extends React.Component {
     this.checkLoginState = this.checkLoginState.bind(this);
     this.statusChangeCallback = this.statusChangeCallback.bind(this);
     this.login = this.login.bind(this);
+    this.loadFacebookSDK = this.loadFacebookSDK.bind(this);
+    this.isFacebookSDKLoaded = this.isFacebookSDKLoaded.bind(this);
   }
   checkLoginState() {
     FB.getLoginStatus(this.statusChangeCallback);
@@ -29,17 +31,18 @@ class TSFacebookLogin extends React.Component {
     } else if (response.status === 'not_authorized') {
       // The person is logged into Facebook, but not your app.
       this.setState({loaded: true});
+      this.props.facebookNotConnected();
     } else {
       // The person is not logged into Facebook, so we're not sure if
       // they are logged into this app or not.
+      this.props.facebookNotConnected();
       this.setState({loaded: true});
     }
   }
   login() {
     FB.login(this.checkLoginState);
   }
-  componentDidMount() {
-    // this.checkLoginState();
+  loadFacebookSDK() {
     window.fbAsyncInit = () => {
       FB.init({
         appId      : '847945558672954',
@@ -61,9 +64,7 @@ class TSFacebookLogin extends React.Component {
       //
       // These three cases are handled in the callback function.
 
-      FB.getLoginStatus(response => {
-        this.statusChangeCallback(response);
-      });
+      this.checkLoginState();
     };
 
     // Load the SDK asynchronously
@@ -74,6 +75,16 @@ class TSFacebookLogin extends React.Component {
       js.src = '//connect.facebook.net/en_US/sdk.js';
       fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'facebook-jssdk'));
+  }
+  isFacebookSDKLoaded() {
+    return typeof FB !== 'undefined';
+  }
+  componentDidMount() {
+    if (this.isFacebookSDKLoaded()) {
+      this.checkLoginState();
+    } else {
+      this.loadFacebookSDK();
+    }
   }
   render() {
     return (

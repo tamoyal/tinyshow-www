@@ -21,7 +21,8 @@ class TSCreatorStats extends React.Component {
               color: '#eeeeee',
             }}>
             {this.props.user.facebook_pages.length}
-          </span> pages connected
+          </span>
+          &nbsp;&nbsp;&nbsp;pages connected
         </div>
       </div>
     )

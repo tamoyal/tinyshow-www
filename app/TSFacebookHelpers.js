@@ -1,22 +1,37 @@
 var TSFacebookHelpers = {
-  getPagesList: (success) => {    
-    FB.api('/me/accounts', (response) => {
-      var facebookPages = response.data.map((pageJSON) => {
-        return new FacebookPage(pageJSON);
-      })
-      success(facebookPages);
+  getPagesList: (facebookId, onSuccess, onError) => {
+    FB.api('/' + facebookId + '/accounts', (response) => {
+      if (response.error) {
+        TSFacebookHelpers.handleError(response, onError);
+      } else {
+        var facebookPages = response.data.map((pageJSON) => {
+          return new FacebookPage(pageJSON);
+        });
+        onSuccess(facebookPages);
+      }
     });
   },
-  getGrantedPermissions: (success) => {
-    FB.api('/me/permissions', (response) => {
-      var gantedPermissions = [];
-      response.data.forEach((permission) => {
-        if (permission['status'] == 'granted')
-          gantedPermissions.push(permission['permission']);
-      });
-      success(gantedPermissions);
+  getGrantedPermissions: (facebookId, onSuccess, onError) => {
+    FB.api('/' + facebookId + '/permissions', (response) => {
+      if (response.error) {
+        TSFacebookHelpers.handleError(response, onError);
+      } else {
+        var gantedPermissions = [];
+        response.data.forEach((permission) => {
+          if (permission['status'] == 'granted')
+            gantedPermissions.push(permission['permission']);
+        });
+        onSuccess(gantedPermissions);
+      }
     });
   },
+  handleError: (response, onError) => {
+    if (onError) {
+      onError(response.error);
+    } else {
+      console.log(response.error);
+    }
+  }
 };
 
 module.exports = TSFacebookHelpers;

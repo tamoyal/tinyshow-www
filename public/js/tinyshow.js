@@ -1,5 +1,6 @@
 var TinyShowUser = function(json) {
   this.tinyShowID = json.id;
+  this.facebookId = json.facebook_id;
   this.firstName = json.first_name;
   this.lastName = json.last_name;
   this.email = json.email;

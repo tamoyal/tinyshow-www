@@ -13,10 +13,20 @@ class TSCreatorsDashboard extends React.Component {
     super(props);
     this.state = {currentUser: TSData.currentUser};
     this.onUserUpdated = this.onUserUpdated.bind(this);
+    this.onAuthError = this.onAuthError.bind(this);
   }
   onUserUpdated(user) {
     TSData.currentUser = user;
     this.setState({currentUser: user});
+  }
+  componentDidMount() {
+    // I don't think this works, maybe FB is not initted yet? but it should be!
+    // FB.Event.subscribe('auth.logout', response => {
+    //   this.props.router.replace('/');
+    // });
+  }
+  onAuthError() {
+    this.props.router.replace('/');
   }
   render() {
     return (
@@ -43,6 +53,7 @@ class TSCreatorsDashboard extends React.Component {
               title="Event Sources"
               user={this.state.currentUser}
               onSettingsSaved={this.onUserUpdated}
+              onAuthError={this.onAuthError}
             />
           </TSTabbedNavigation>
         </div>
