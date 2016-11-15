@@ -10,8 +10,15 @@ class TSCreatorsDashboard extends React.Component {
     return (
       <TSTabbedNavigation>
         <TSCreatorStats title="Home" user={this.props.currentUser} />
-        <TSCreatorAccountForm title="Account Settings" user={this.props.currentUser} />
-        <TSCreatorEventSourcesForm title="Event Sources" user={this.props.currentUser} />
+        <TSCreatorAccountForm
+          title="Account Settings"
+          user={this.props.currentUser}
+          onSettingsSaved={this.props.onUserUpdated} />
+        <TSCreatorEventSourcesForm
+          title="Event Sources"
+          user={this.props.currentUser}
+          onSettingsSaved={this.props.onUserUpdated}
+        />
       </TSTabbedNavigation>
     )
   }

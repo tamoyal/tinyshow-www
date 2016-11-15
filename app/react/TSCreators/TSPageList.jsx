@@ -24,8 +24,16 @@ class TSPageList extends React.Component {
           <label>
             <input
               name={'facebook_pages['+page.id+']'}
+              type="hidden"
+              value="false"
+            />
+            <input
+              defaultChecked={this.props.selectedPageIds &&
+                this.props.selectedPageIds.indexOf(page.id) >= 0}
+              name={'facebook_pages['+page.id+']'}
               value={page.originalPayloadJSON()}
-              type="checkbox" />
+              type="checkbox"
+            />
             {this.renderImage(page)}
             {this.renderPageName(page)}
           </label>
@@ -44,7 +52,12 @@ class TSPageList extends React.Component {
     return (
       <div>
         <label>{this.props.title}</label>
-        <ul style={{listStyle: 'none', marginTop: 6, padding: 0}}>
+        <ul
+          style={{
+            listStyle: 'none',
+            marginTop: '6px 0px 0px 0px',
+            padding: 0,
+          }}>
           {this.props.pages.map((p, k) => {
             return (
               <li key={k}>

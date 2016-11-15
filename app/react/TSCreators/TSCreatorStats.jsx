@@ -7,7 +7,7 @@ class TSCreatorStats extends React.Component {
       <div>
         <TSProfileSpot user={this.props.user} />
         <ul style={{padding: 0, marginTop: 10}}>
-          <li>You have x pages connected to TinyShow Boost</li>
+          <li>You have {this.props.user.facebook_pages.length} pages connected to TinyShow Boost</li>
           <li>TinyShow has boosted 17 of your events</li>
         </ul>
       </div>

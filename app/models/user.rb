@@ -1,5 +1,7 @@
 class User < ActiveRecord::Base
-	has_many :facebook_pages, class_name: 'UserFacebookPage'
+	has_many :facebook_pages,
+    -> { where deactivated_at: nil },
+    class_name: 'UserFacebookPage'
 
   validates_uniqueness_of :facebook_id
   validates_uniqueness_of :email, unless: Proc.new { |u| u.confirmed_at.nil? }

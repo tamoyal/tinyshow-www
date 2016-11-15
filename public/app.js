@@ -19854,6 +19854,7 @@
 	    _this2.grant = _this2.grant.bind(_this2);
 	    _this2.facebookConnected = _this2.facebookConnected.bind(_this2);
 	    _this2.onRegistered = _this2.onRegistered.bind(_this2);
+	    _this2.onUserUpdated = _this2.onUserUpdated.bind(_this2);
 	    return _this2;
 	  }
 
@@ -19912,9 +19913,18 @@
 	      this.setState({ currentUser: TSData.currentUser });
 	    }
 	  }, {
+	    key: 'onUserUpdated',
+	    value: function onUserUpdated(user) {
+	      TSData.currentUser = user;
+	      this.setState({ currentUser: user });
+	    }
+	  }, {
 	    key: 'renderRegisteredUser',
 	    value: function renderRegisteredUser() {
-	      return _react2.default.createElement(TSCreatorsDashboard, { currentUser: this.state.currentUser });
+	      return _react2.default.createElement(TSCreatorsDashboard, {
+	        currentUser: this.state.currentUser,
+	        onUserUpdated: this.onUserUpdated
+	      });
 	    }
 	  }, {
 	    key: 'renderFacebookAuthenticatedUser',
@@ -20535,8 +20545,15 @@
 	        TSTabbedNavigation,
 	        null,
 	        _react2.default.createElement(TSCreatorStats, { title: 'Home', user: this.props.currentUser }),
-	        _react2.default.createElement(TSCreatorAccountForm, { title: 'Account Settings', user: this.props.currentUser }),
-	        _react2.default.createElement(TSCreatorEventSourcesForm, { title: 'Event Sources', user: this.props.currentUser })
+	        _react2.default.createElement(TSCreatorAccountForm, {
+	          title: 'Account Settings',
+	          user: this.props.currentUser,
+	          onSettingsSaved: this.props.onUserUpdated }),
+	        _react2.default.createElement(TSCreatorEventSourcesForm, {
+	          title: 'Event Sources',
+	          user: this.props.currentUser,
+	          onSettingsSaved: this.props.onUserUpdated
+	        })
 	      );
 	    }
 	  }]);
@@ -20590,7 +20607,9 @@
 	          _react2.default.createElement(
 	            'li',
 	            null,
-	            'You have x pages connected to TinyShow Boost'
+	            'You have ',
+	            this.props.user.facebook_pages.length,
+	            ' pages connected to TinyShow Boost'
 	          ),
 	          _react2.default.createElement(
 	            'li',
@@ -21068,6 +21087,9 @@
 	          ),
 	          this.state.loaded && this.state.facebookPages.length > 0 && _react2.default.createElement(TSPageList, {
 	            pages: this.state.facebookPages,
+	            selectedPageIds: this.props.user.facebook_pages.map(function (p) {
+	              return p['facebook_id'];
+	            }),
 	            title: 'Select your facebook pages that have events:',
 	            withCheckbox: 'true'
 	          }),
@@ -21200,8 +21222,15 @@
 	            null,
 	            _react2.default.createElement('input', {
 	              name: 'facebook_pages[' + page.id + ']',
+	              type: 'hidden',
+	              value: 'false'
+	            }),
+	            _react2.default.createElement('input', {
+	              defaultChecked: this.props.selectedPageIds && this.props.selectedPageIds.indexOf(page.id) >= 0,
+	              name: 'facebook_pages[' + page.id + ']',
 	              value: page.originalPayloadJSON(),
-	              type: 'checkbox' }),
+	              type: 'checkbox'
+	            }),
 	            this.renderImage(page),
 	            this.renderPageName(page)
 	          )
@@ -21230,7 +21259,12 @@
 	        ),
 	        _react2.default.createElement(
 	          'ul',
-	          { style: { listStyle: 'none', marginTop: 6, padding: 0 } },
+	          {
+	            style: {
+	              listStyle: 'none',
+	              marginTop: '6px 0px 0px 0px',
+	              padding: 0
+	            } },
 	          this.props.pages.map(function (p, k) {
 	            return _react2.default.createElement(
 	              'li',

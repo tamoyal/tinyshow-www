@@ -19,6 +19,7 @@ ActiveRecord::Schema.define(version: 20161102053602) do
     t.string   "facebook_id"
     t.string   "facebook_access_token"
     t.string   "graph_payload"
+    t.datetime "deactivated_at"
     t.integer  "user_id"
     t.datetime "created_at",            null: false
     t.datetime "updated_at",            null: false

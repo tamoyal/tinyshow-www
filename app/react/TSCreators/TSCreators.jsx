@@ -46,6 +46,7 @@ class TSCreators extends React.Component {
     this.grant = this.grant.bind(this);
     this.facebookConnected = this.facebookConnected.bind(this);
     this.onRegistered = this.onRegistered.bind(this);
+    this.onUserUpdated = this.onUserUpdated.bind(this);
   }
   checkPermissions() {
     TSFacebookHelpers.getGrantedPermissions(granted => {
@@ -89,9 +90,16 @@ class TSCreators extends React.Component {
   onRegistered() {
     this.setState({currentUser: TSData.currentUser});
   }
+  onUserUpdated(user) {
+    TSData.currentUser = user;
+    this.setState({currentUser: user});
+  }
   renderRegisteredUser() {
     return (
-      <TSCreatorsDashboard currentUser={this.state.currentUser} />
+      <TSCreatorsDashboard
+        currentUser={this.state.currentUser}
+        onUserUpdated={this.onUserUpdated}
+      />
     )
   }
   renderFacebookAuthenticatedUser() {

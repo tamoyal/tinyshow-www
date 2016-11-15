@@ -69,6 +69,11 @@ class TSCreatorEventSourcesForm extends React.Component {
             {this.state.loaded && this.state.facebookPages.length > 0 &&
               <TSPageList
                 pages={this.state.facebookPages}
+                selectedPageIds={
+                  this.props.user.facebook_pages.map((p) => {
+                    return p['facebook_id'];
+                  })
+                }
                 title="Select your facebook pages that have events:"
                 withCheckbox="true"
               />

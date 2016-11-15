@@ -43,6 +43,13 @@ helpers do
   end
 end
 
+before do
+	if settings.development?
+		puts '[Params]'
+		p params
+	end
+end
+
 get '/' do
 	erb :welcome
 end
@@ -108,25 +115,31 @@ put "/users" do
 
 		errors = []
 		if params["facebook_pages"]
-			params["facebook_pages"].each do |facebook_id, json|
-				facebook_page = JSON.parse(json)
-				t = extend_token(facebook_page["access_token"])
-				if t
-					attrs = {
-						facebook_id: facebook_page["id"],
-						facebook_access_token: t,
-						graph_payload: json,
-					}
-
-					page = u.facebook_pages.find_by_facebook_id(facebook_page["id"])
-					if page
-						page.update!(attrs)
-					else
-						u.facebook_pages.create!(attrs)
-					end
+			params["facebook_pages"].each do |facebook_id, val|
+				if val == "false"
+					page = u.facebook_pages.find_by_facebook_id(facebook_id)
+					page.deactivate if page
 				else
-					TinyShow.error "Could not get long lived access token for page" if t.nil?
-					errors << "Token problem with page '#{facebook_page["id"]}'"
+					facebook_page = JSON.parse(val)
+					t = extend_token(facebook_page["access_token"])
+					if t
+						attrs = {
+							facebook_id: facebook_page["id"],
+							facebook_access_token: t,
+							graph_payload: val,
+							deactivated_at: nil,
+						}
+
+						page = UserFacebookPage.where(user: u, facebook_id: facebook_page["id"]).first
+						if page
+							page.update!(attrs)
+						else
+							u.facebook_pages.create!(attrs)
+						end
+					else
+						TinyShow.error "Could not get long lived access token for page" if t.nil?
+						errors << "Token problem with page '#{facebook_page["id"]}'"
+					end
 				end
 			end
 		end
