@@ -88,12 +88,9 @@ class TSFacebookLogin extends React.Component {
   }
   render() {
     return (
-      <div style={{marginLeft: 60}}>
+      <div style={this.props.style}>
         {this.state.loaded &&
           <TSFacebookLoginButton onClick={this.login} />
-        }
-        {!this.state.loaded &&
-          <div>LOADING...</div>
         }
       </div>
     )

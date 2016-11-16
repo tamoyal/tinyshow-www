@@ -122,25 +122,21 @@ class TSCreators extends React.Component {
         <TSTopNavBar>
           <TSBoostBranding />
         </TSTopNavBar>
-        <TSBoostMarketing
-          style={{
-            paddingLeft: 60,
-            paddingRight: 40,
-            marginTop: 16,
-            width: 800,
-          }}
-        />
-        {this.state.loading &&
-          <TSLoader />
-        }
-        <div
-          style={{
-            padding: '40px 40px 40px 0px',
-            width: 800,
-          }}>
-          {this.state.currentUser ? 
-            this.renderFacebookAuthenticatedUser() :
-            this.renderUnauthenticated()}
+
+        <div style={{paddingLeft: 60, paddingRight: 40, width: 800}}>
+          {!this.state.loading &&
+            <TSBoostMarketing style={{marginTop: 16}} />
+          }
+
+          {this.state.loading &&
+            <TSLoader style={{marginTop: 60}} />
+          }
+
+          <div style={{marginTop: 40, marginBottom: 40}}>
+            {this.state.currentUser ? 
+              this.renderFacebookAuthenticatedUser() :
+              this.renderUnauthenticated()}
+          </div>
         </div>
       </div>
     )

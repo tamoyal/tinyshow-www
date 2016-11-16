@@ -32,7 +32,7 @@ class TSUserRegistration extends React.Component {
   }
   render() {
     return (
-      <TSWell title={this.wellTitle()} style={{marginLeft: 60}}>
+      <TSWell title={this.wellTitle()} style={this.props.style}>
         {this.state.step == 1 &&
           <div>
             <TSCreatorAccountForm

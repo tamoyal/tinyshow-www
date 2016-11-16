@@ -16,7 +16,7 @@ class TSMissingPermissions extends React.Component {
     return (
       <TSWell
         title="You must grant these permissions to connect your events to TinyShow"
-        style={{marginLeft: 60}}>
+        style={this.props.style}>
         <ul>
           {this.props.missingPermissions.map((p, k) => {
             return (
