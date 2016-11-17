@@ -7,6 +7,8 @@ module TinyShow
       oauth = Koala::Facebook::OAuth.new("847945558672954", "5bb6bcff0a70da76f9820c6d243720bc")
       begin
         new_access_info = oauth.exchange_access_token_info(facebook_access_token)
+        TinyShow.debug new_access_info
+
         if new_access_info["access_token"]
           self.facebook_access_token = new_access_info["access_token"]
           nil
