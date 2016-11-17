@@ -1,30 +1,44 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
+var TSProgressButton = require('../components/TSProgressButton.jsx');
+var TSFormResult = require('../components/TSFormResult.jsx');
 var TSStyle = require('../../TSStyle.js');
 
 class TSCreatorAccountForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      saving: false,
+      success: null,
+      error: null,
       data: {
         firstName: this.props.user.firstName,
         lastName: this.props.user.lastName,
         email: this.props.user.email,
         phone: this.props.user.phone,
-      }
+      },
     };
     this.onSubmit = this.onSubmit.bind(this);
   }
   onSubmit(e) {
-    e.preventDefault(); // TODO: do I need these?
+    this.setState({saving: true, success: null, error: null});
+    e.preventDefault();
     TinyShowApi.updateUser(
       $(ReactDOM.findDOMNode(this.refs.accountForm)).serialize(),
       (response) => {
+        this.setState({saving: false, success: 1});
         this.props.onSettingsSaved(new TinyShowUser(response));
       },
       (xhr) => {
         console.log(xhr);
+        var error;
+        if (xhr.status >= 500) {
+          error = "Something unexpected went wrong, we're looking into it.";
+        } else {
+          error = xhr.statusText;
+        }
+        this.setState({saving: false, error: error});
       });
   }
   render() {
@@ -75,7 +89,7 @@ class TSCreatorAccountForm extends React.Component {
             defaultValue={this.state.data.email}
             type="email"
             className="form-control"
-            ariaDescribedby="emailHelp"
+            aria-describedby="emailHelp"
             placeholder="Email" />
           <small id="emailHelp" className="form-text text-muted">
             We'll never share your email with anyone else.
@@ -90,7 +104,7 @@ class TSCreatorAccountForm extends React.Component {
             defaultValue={this.state.data.phone}
             type="phone"
             className="form-control"
-            ariaDescribedby="phoneHelp"
+            aria-describedby="phoneHelp"
             placeholder="Phone" />
           <small id="phoneHelp" className="form-text text-muted">
             It's good to have another contact method if there are problems with your account.
@@ -109,7 +123,19 @@ class TSCreatorAccountForm extends React.Component {
           value="1"
         />
 
-        <button type="submit" className="btn btn-default">Save</button>
+        <div style={{display: 'flex', height: 40}}>
+          <TSProgressButton
+            type="submit"
+            text="Save"
+            loadingText="Saving"
+            loading={this.state.saving}
+            style={{width: 120}}
+          />
+          <TSFormResult
+            error={this.state.error}
+            success={this.state.success}
+          />
+        </div>
       </form>
     )
   }

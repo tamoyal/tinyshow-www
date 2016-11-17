@@ -5,12 +5,17 @@ var TSStyle = require('../../TSStyle.js');
 var TSFacebookHelpers = require('../../TSFacebookHelpers.js');
 var TSPageList = require('./TSPageList.jsx');
 var TSVerticalCenter = require('../components/TSVerticalCenter.jsx');
+var TSFormResult = require('../components/TSFormResult.jsx');
+var TSProgressButton = require('../components/TSProgressButton.jsx');
 
 class TSCreatorEventSourcesForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      saving: false,
       loaded: false,
+      success: null,
+      error: null,
       facebookPages: [],
       get_events_from_user_fb_account:
         this.props.user.get_events_from_user_fb_account || false,
@@ -18,14 +23,23 @@ class TSCreatorEventSourcesForm extends React.Component {
     this.onSubmit = this.onSubmit.bind(this);
   }
   onSubmit(e) {
-    e.preventDefault(); // TODO: do I need these?
+    this.setState({saving: true, success: null, error: null});
+    e.preventDefault();
     TinyShowApi.updateUser(
       $(ReactDOM.findDOMNode(this.refs.eventSourcesForm)).serialize(),
       (response) => {
+        this.setState({saving: false, success: 1});
         this.props.onSettingsSaved(new TinyShowUser(response));
       },
       (xhr) => {
         console.log(xhr);
+        var error;
+        if (xhr.status >= 500) {
+          error = "Something unexpected went wrong, we're looking into it.";
+        } else {
+          error = xhr.statusText;
+        }
+        this.setState({saving: false, error: error});
       });
   }
   componentDidMount() {
@@ -101,12 +115,19 @@ class TSCreatorEventSourcesForm extends React.Component {
               value={this.props.user.auth_token}
             />
 
-            <button
-              type="submit"
-              className="btn btn-default"
-              style={{marginTop: 20}}>
-              Save
-            </button>
+            <div style={{display: 'flex', height: 40, marginTop: 20}}>
+              <TSProgressButton
+                type="submit"
+                text="Save"
+                loadingText="Saving"
+                loading={this.state.saving}
+                style={{width: 120}}
+              />
+              <TSFormResult
+                error={this.state.error}
+                success={this.state.success}
+              />
+            </div>
           </form>
         }
 

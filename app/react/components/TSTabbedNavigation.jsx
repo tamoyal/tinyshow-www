@@ -31,7 +31,7 @@ class TSTabbedNavigation extends React.Component {
             )
           })}
         </ul>
-        <div style={{paddingLeft: 40}}>
+        <div style={{paddingLeft: 40,  width: '100%'}}>
           {this.props.children[this.state.selectedIndex]}
         </div>
       </div>

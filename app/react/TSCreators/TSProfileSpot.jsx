@@ -19,7 +19,7 @@ class ProfileIconFacebook extends React.Component {
         }, this.props.style)}>
         <i
           className="fa fa-facebook"
-          ariaHidden="true"
+          aria-hidden="true"
           style={{fontSize: 10}}>
         </i>
       </div>

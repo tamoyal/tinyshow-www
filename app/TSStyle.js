@@ -4,6 +4,7 @@ var TSStyle = {
   darkBlue: '#26499f',
   green: '#00F0B5',
   white: '#ffffff',
+  red: '#ff0000',
 };
 
 module.exports = TSStyle;

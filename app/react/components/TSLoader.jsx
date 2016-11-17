@@ -6,7 +6,7 @@ class TSLoader extends React.Component {
   render() {
     var lines = [];
     for (var i = 0; i < 5; ++i)
-      lines.push(<div style={{width: 6, height: 100}}></div>);
+      lines.push(<div key={i} style={{width: 6, height: 100}}></div>);
 
     return (
       <div
