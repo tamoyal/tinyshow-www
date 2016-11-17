@@ -14,7 +14,7 @@ class TSFacebookLoginButton extends React.Component {
 class TSFacebookLogin extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {loaded: false};
+    this.state = {loaded: false, connected: false};
     this.checkLoginState = this.checkLoginState.bind(this);
     this.statusChangeCallback = this.statusChangeCallback.bind(this);
     this.login = this.login.bind(this);
@@ -27,6 +27,7 @@ class TSFacebookLogin extends React.Component {
   statusChangeCallback(response) {
     if (response.status === 'connected') {
       // Logged into your app and Facebook.
+      this.setState({connected: true});
       this.props.facebookConnected();
     } else if (response.status === 'not_authorized') {
       // The person is logged into Facebook, but not your app.
@@ -40,7 +41,7 @@ class TSFacebookLogin extends React.Component {
     }
   }
   login() {
-    FB.login(this.checkLoginState);
+    FB.login(this.checkLoginState, {scope: REQUIRED_CREATOR_PERMISSIONS.join(',')});
   }
   loadFacebookSDK() {
     window.fbAsyncInit = () => {
@@ -89,7 +90,7 @@ class TSFacebookLogin extends React.Component {
   render() {
     return (
       <div style={this.props.style}>
-        {this.state.loaded &&
+        {this.state.loaded && !this.state.connected &&
           <TSFacebookLoginButton onClick={this.login} />
         }
       </div>

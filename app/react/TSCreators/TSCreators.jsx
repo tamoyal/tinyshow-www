@@ -53,8 +53,9 @@ class TSCreators extends React.Component {
       });
   }
   grant() {
-    this.setState({loading: true});
     FB.login(response => {
+      console.log(response);
+      this.setState({loading: true});
       this.checkPermissions();
     },
     {
