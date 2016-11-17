@@ -10,10 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161102053602) do
+ActiveRecord::Schema.define(version: 20161117203245) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "facebook_events", force: :cascade do |t|
+    t.string   "facebook_id"
+    t.string   "owner_facebook_id"
+    t.string   "graph_payload"
+    t.datetime "starts_at"
+    t.datetime "created_at",        null: false
+    t.datetime "updated_at",        null: false
+    t.index ["facebook_id", "owner_facebook_id"], name: "index_facebook_events_on_facebook_id_and_owner_facebook_id", unique: true, using: :btree
+  end
 
   create_table "user_facebook_pages", force: :cascade do |t|
     t.string   "facebook_id"

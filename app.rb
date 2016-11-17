@@ -121,18 +121,20 @@ put "/users" do
 					page.deactivate if page
 				else
 					facebook_page = JSON.parse(val)
-					page = UserFacebookPage.where(user: u, facebook_id: facebook_page["id"]).first ||
-						u.facebook_pages.new({
-							facebook_id: facebook_page["id"],
-							facebook_access_token: facebook_page["access_token"],
-							graph_payload: val,
-							deactivated_at: nil,
-						})
+					page = UserFacebookPage.find_or_initialize_by({
+						user: u,
+						facebook_id: facebook_page["id"],
+					})
+					page.facebook_id = facebook_page["id"]
+					page.facebook_access_token = facebook_page["access_token"]
+					page.graph_payload = val
+					page.deactivated_at = nil
+
 					error = page.extend_access_token
 					if error.nil?
 						page.save!
 					else
-						TinyShow.error "Could not get long lived access token for page" if t.nil?
+						TinyShow.error "Could not get long lived access token for page"
 						errors << "Token problem with page '#{facebook_page["id"]}'"
 					end
 				end
@@ -169,33 +171,26 @@ end
 
 get '/users/:id/facebook_events' do
 	user = User.find(params[:id])
-	graph = Koala::Facebook::API.new(user.facebook_access_token)
-	events = graph.get_connections("me", "events")
-	respond(200, events)
+	begin
+		events = TinyShow::FacebookHelpers.events_for_facebook_id!(
+			user.facebook_id,
+	    user.facebook_access_token,
+		)
+		respond(200, events)
+	rescue Koala::Facebook::APIError => e
+		respond(422, {})
+	end
 end
 
-# NOTE: We could store the expiration time and check that
-# ...but we'd probably have to handle the error anyway
-# ...so should we bother having multiple types of checks?
-# ...or just wait for the expiration exception? (this for now)
 get '/pages/:id/facebook_events' do
 	page = UserFacebookPage.find(params[:id])
-
-	events = nil
 	begin
-		graph = Koala::Facebook::API.new(page.facebook_access_token)
-		events = graph.get_connections(page.facebook_id, "events")
+		events = TinyShow::FacebookHelpers.events_for_facebook_id!(
+			page.facebook_id,
+	    page.facebook_access_token,
+		)
+		respond(200, events)
 	rescue Koala::Facebook::APIError => e
-		puts "Koala::Facebook::APIError:"
-		ap e
-
-		error = page.extend_access_token
-		if error.nil?
-			page.save!
-			events = graph.get_connections(page.facebook_id, "events")
-		else
-			respond(422, {})
-		end
+		respond(422, {})
 	end
-	respond(200, events)
 end
