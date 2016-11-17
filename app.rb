@@ -81,24 +81,24 @@ end
 post "/login" do
 	graph = Koala::Facebook::API.new(params[:facebook_access_token])
 	me = graph.get_object("me?fields=#{FACEBOOK_USER_FIELDS.join(",")}")
+
 	if me["id"] == params[:facebook_id]
-		t = extend_token(params[:facebook_access_token])
-		if t.nil?
-			TinyShow.error "TinyShow Login: Could not get long lived access token for #{me["user_id"]}"
-			respond(400, {})
-		else
-			u = User.find_by_facebook_id(me["id"])
-			if !u
-				u = User.create!({
-					facebook_id: me["id"],
-					facebook_access_token: t,
-					facebook_graph_payload: me,
-					email: me["email"],
-					first_name: me["first_name"],
-					last_name: me["last_name"],
-				})
-			end
+		u = User.find_by_facebook_id(me["id"]) ||
+			User.new({
+				facebook_id: me["id"],
+				facebook_access_token: params[:facebook_access_token],
+				facebook_graph_payload: me,
+				email: me["email"],
+				first_name: me["first_name"],
+				last_name: me["last_name"],
+			})
+		error = u.extend_access_token
+		if error.nil?
+			u.save!
 			respond(200, u.as_json(:include => [:facebook_pages]))
+		else
+			TinyShow.error "TinyShow Login: Could not get long lived access token for #{me["id"]}"
+			respond(400, {})
 		end
 	else
 		respond(400, {})
@@ -121,21 +121,16 @@ put "/users" do
 					page.deactivate if page
 				else
 					facebook_page = JSON.parse(val)
-					t = extend_token(facebook_page["access_token"])
-					if t
-						attrs = {
+					page = UserFacebookPage.where(user: u, facebook_id: facebook_page["id"]).first ||
+						u.facebook_pages.new({
 							facebook_id: facebook_page["id"],
-							facebook_access_token: t,
+							facebook_access_token: facebook_page["access_token"],
 							graph_payload: val,
 							deactivated_at: nil,
-						}
-
-						page = UserFacebookPage.where(user: u, facebook_id: facebook_page["id"]).first
-						if page
-							page.update!(attrs)
-						else
-							u.facebook_pages.create!(attrs)
-						end
+						})
+					error = page.extend_access_token
+					if error.nil?
+						page.save!
 					else
 						TinyShow.error "Could not get long lived access token for page" if t.nil?
 						errors << "Token problem with page '#{facebook_page["id"]}'"
@@ -151,27 +146,6 @@ put "/users" do
 		end
 	else
 		respond(404, {error: "User not found"})
-	end
-end
-
-# Important: While it took an hour of reading docs to find this out, it turns out
-# this is not for refreshing expired tokens. So you have to call this before the
-# token expires or users will have to re-login.
-def extend_token(token)
-	oauth = Koala::Facebook::OAuth.new("847945558672954", "5bb6bcff0a70da76f9820c6d243720bc")
-	begin
-		new_access_info = oauth.exchange_access_token_info(token)
-		if new_access_info["access_token"]
-			new_access_info["access_token"]
-		else
-			TinyShow.warn "Could not refresh access token"
-		end
-	rescue Koala::Facebook::OAuthTokenRequestError => e
-		puts "Koala::Facebook::OAuthTokenRequestError"
-		TinyShow.error e
-	rescue Koala::Facebook::ServerError => e
-		puts "Koala::Facebook::ServerError"
-		TinyShow.error e
 	end
 end
 
@@ -215,9 +189,9 @@ get '/pages/:id/facebook_events' do
 		puts "Koala::Facebook::APIError:"
 		ap e
 
-		refreshed_token = extend_token(page.facebook_access_token)
-		if refreshed_token
-			page.update_attribute(:facebook_access_token, refreshed_token)
+		error = page.extend_access_token
+		if error.nil?
+			page.save!
 			events = graph.get_connections(page.facebook_id, "events")
 		else
 			respond(422, {})
@@ -225,5 +199,3 @@ get '/pages/:id/facebook_events' do
 	end
 	respond(200, events)
 end
-
-

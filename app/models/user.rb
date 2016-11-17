@@ -1,4 +1,6 @@
 class User < ActiveRecord::Base
+  include TinyShow::FacebookAuthable
+
 	has_many :facebook_pages,
     -> { where deactivated_at: nil },
     class_name: 'UserFacebookPage'

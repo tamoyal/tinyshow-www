@@ -1,4 +1,6 @@
 class UserFacebookPage < ActiveRecord::Base
+  include TinyShow::FacebookAuthable
+
 	belongs_to :user
 
 	validates_uniqueness_of :facebook_id, scope: :user_id
