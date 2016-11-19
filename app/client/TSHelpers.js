@@ -1,4 +1,4 @@
-TSHelpers = {
+var TSHelpers = {
   mergeObj: function(arg1, arg2, arg3, arg4, arg5) {
     var args = [arg1, arg2, arg3, arg4, arg5];
     var result = {};
