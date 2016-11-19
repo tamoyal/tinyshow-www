@@ -87,6 +87,7 @@ post "/login" do
 			User.new({
 				facebook_id: me["id"],
 				facebook_access_token: params[:facebook_access_token],
+				facebook_access_token_expiration: params[:facebook_access_token_expiration],
 				facebook_graph_payload: me,
 				email: me["email"],
 				first_name: me["first_name"],
@@ -108,12 +109,11 @@ end
 put "/users" do
 	user_attrs = params["user"].dup
 	t = user_attrs.delete("auth_token")
-	u = User.find_by_facebook_access_token(t)
+	u = User.includes(:facebook_pages).find_by_facebook_access_token(t)
 	if u
 		user_attrs["confirmed_at"] = Time.now if user_attrs.delete("confirm") == "1"
 		u.update!(user_attrs)
 
-		errors = []
 		if params["facebook_pages"]
 			params["facebook_pages"].each do |facebook_id, val|
 				if val == "false"
@@ -129,23 +129,12 @@ put "/users" do
 					page.facebook_access_token = facebook_page["access_token"]
 					page.graph_payload = val
 					page.deactivated_at = nil
-
-					error = page.extend_access_token
-					if error.nil?
-						page.save!
-					else
-						TinyShow.error "Could not get long lived access token for page"
-						errors << "Token problem with page '#{facebook_page["id"]}'"
-					end
+					page.save!
 				end
 			end
 		end
 
-		if errors.empty?
-			respond(200, u.reload.as_json(:include => [:facebook_pages]))
-		else
-			respond(422, {error: errors.join(",")})
-		end
+		respond(200, u.reload.as_json(:include => [:facebook_pages]))
 	else
 		respond(404, {error: "User not found"})
 	end

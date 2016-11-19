@@ -7,6 +7,7 @@ class CreateUsers < ActiveRecord::Migration[5.0]
 			t.string :phone
 			t.string :facebook_id
 			t.string :facebook_access_token
+      t.datetime :facebook_access_token_expiration
 			t.string :facebook_graph_payload
       t.datetime :confirmed_at
 			t.boolean :get_events_from_user_fb_account

@@ -11,6 +11,7 @@ module TinyShow
 
         if new_access_info["access_token"]
           self.facebook_access_token = new_access_info["access_token"]
+          self.facebook_access_token_expiration = Time.now.utc + new_access_info["expires"].to_i
           nil
         else
           TinyShow.warn "Could not refresh access token"

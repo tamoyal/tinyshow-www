@@ -44,11 +44,12 @@ ActiveRecord::Schema.define(version: 20161117203245) do
     t.string   "phone"
     t.string   "facebook_id"
     t.string   "facebook_access_token"
+    t.datetime "facebook_access_token_expiration"
     t.string   "facebook_graph_payload"
     t.datetime "confirmed_at"
     t.boolean  "get_events_from_user_fb_account"
-    t.datetime "created_at",                      null: false
-    t.datetime "updated_at",                      null: false
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
     t.index ["email"], name: "index_users_on_email", unique: true, where: "(confirmed_at IS NOT NULL)", using: :btree
     t.index ["facebook_id"], name: "index_users_on_facebook_id", unique: true, using: :btree
   end

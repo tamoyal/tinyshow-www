@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 var TSProgressButton = require('../components/TSProgressButton.jsx');
 var TSFormResult = require('../components/TSFormResult.jsx');
 var TSStyle = require('../../TSStyle.js');
+var TinyShowApi = require('../../TinyShowApi.js');
 
 class TSCreatorAccountForm extends React.Component {
   constructor(props) {

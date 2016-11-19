@@ -24,34 +24,3 @@ var FacebookPage = function(json) {
   }
 };
 
-var TinyShowApi = {
-  login: function(onSuccess, onError) {
-    var auth = FB.getAuthResponse();
-    $.ajax({
-      url: '/login',
-      data: {facebook_id: auth['userID'], facebook_access_token: auth['accessToken']},
-      type: 'POST',
-      dataType: 'json',
-      success: function(user) {
-        onSuccess(user);
-      },
-      error: function(xhr, textStatus, errorThrown) {
-        onError(xhr);
-      }
-    });
-  },
-  updateUser: function(attrs, onSuccess, onError) {
-    $.ajax({
-      url: '/users',
-      data: attrs,
-      type: 'PUT',
-      dataType: 'json',
-      success: response => {
-        onSuccess(response);
-      },
-      error: (xhr, textStatus, errorThrown) => {
-        onError(xhr);
-      }
-    });
-  },
-}

@@ -9,6 +9,7 @@ var TSFacebookHelpers = require('../../TSFacebookHelpers.js');
 var TSUserRegistration = require('./TSUserRegistration.jsx');
 var TSBoostMarketing = require('./TSBoostMarketing.jsx');
 var TSData = require('../../TSData.js');
+var TinyShowApi = require('../../TinyShowApi.js');
 
 class TSCreators extends React.Component {
   constructor(props) {

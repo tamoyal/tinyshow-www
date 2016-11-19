@@ -7,6 +7,7 @@ var TSPageList = require('./TSPageList.jsx');
 var TSVerticalCenter = require('../components/TSVerticalCenter.jsx');
 var TSFormResult = require('../components/TSFormResult.jsx');
 var TSProgressButton = require('../components/TSProgressButton.jsx');
+var TinyShowApi = require('../../TinyShowApi.js');
 
 class TSCreatorEventSourcesForm extends React.Component {
   constructor(props) {
@@ -105,7 +106,7 @@ class TSCreatorEventSourcesForm extends React.Component {
             {this.state.loaded && this.state.facebookPages.length == 0 &&
               <div>
                 You have no facebook pages to pull events from.&nbsp;
-                <a href="/contact-us">Does this seem wrong?</a>
+                <small><a href="/contact-us">Does this seem wrong?</a></small>
               </div>
             }
 
