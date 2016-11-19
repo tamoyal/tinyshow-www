@@ -11,6 +11,7 @@ require 'sinatra/activerecord'
 require 'awesome_print'
 require 'app/models/user'
 require 'app/models/user_facebook_page'
+require 'app/models/facebook_event'
 require 'koala'
 
 Tilt.register Tilt::ERBTemplate, 'html.erb'
@@ -95,7 +96,11 @@ post "/login" do
 		error = u.extend_access_token
 		if error.nil?
 			u.save!
-			respond(200, u.as_json(:include => [:facebook_pages]))
+			u.update_pages
+			respond(200, u.as_json({
+				include: [:facebook_pages],
+				methods: :upcoming_facebook_events_count,
+			}))
 		else
 			TinyShow.error "TinyShow Login: Could not get long lived access token for #{me["id"]}"
 			respond(400, {})

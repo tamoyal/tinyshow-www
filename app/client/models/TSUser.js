@@ -10,6 +10,7 @@ class TSUser {
     this.get_events_from_user_fb_account = json.get_events_from_user_fb_account;
     this.pictureUrl = 'http://graph.facebook.com/' + json.facebook_id + '/picture?type=square';
     this.facebook_pages = json.facebook_pages;
+    this.upcomingEventsCount = json.upcoming_facebook_events_count;
     this.auth_token = json.facebook_access_token;
   }
 }

@@ -4,7 +4,7 @@ module TinyShow
       begin
         events_for_facebook_id!(facebook_id, token)
       rescue Koala::Facebook::APIError => e
-        Sidewalk.error e
+        TinyShow.error "Error getting events for Facebook ID: #{facebook_id}\n#{e}"
       end
     end
 
