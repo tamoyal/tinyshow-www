@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 
 import TSVerticalCenter from '../components/TSVerticalCenter.jsx';
 import TSStyle from '../TSStyle.js';
+import TSHelpers from '../TSHelpers.js';
 
 class ProfileIconFacebook extends React.Component {
   render() {
