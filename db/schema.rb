@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161117203245) do
+ActiveRecord::Schema.define(version: 20161119214948) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -33,6 +33,7 @@ ActiveRecord::Schema.define(version: 20161117203245) do
     t.integer  "user_id"
     t.datetime "created_at",            null: false
     t.datetime "updated_at",            null: false
+    t.datetime "events_fetched_at"
     t.index ["user_id", "facebook_id"], name: "index_user_facebook_pages_on_user_id_and_facebook_id", unique: true, using: :btree
     t.index ["user_id"], name: "index_user_facebook_pages_on_user_id", using: :btree
   end
@@ -50,6 +51,7 @@ ActiveRecord::Schema.define(version: 20161117203245) do
     t.boolean  "get_events_from_user_fb_account"
     t.datetime "created_at",                       null: false
     t.datetime "updated_at",                       null: false
+    t.datetime "events_fetched_at"
     t.index ["email"], name: "index_users_on_email", unique: true, where: "(confirmed_at IS NOT NULL)", using: :btree
     t.index ["facebook_id"], name: "index_users_on_facebook_id", unique: true, using: :btree
   end

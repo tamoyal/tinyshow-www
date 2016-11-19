@@ -1,0 +1,22 @@
+module TinyShow
+  class EventAggregator
+    def self.facebook_events(thing)
+      TinyShow::FacebookHelpers.events_for_facebook_id(
+        thing.facebook_id,
+        thing.facebook_access_token,
+      ).map { |e| build_event(e, thing.facebook_id) }
+    end
+
+    private
+
+    def self.build_event(facebook_payload, owner_facebook_id)
+      event = FacebookEvent.find_or_initialize_by({
+        facebook_id: facebook_payload["id"],
+        owner_facebook_id: owner_facebook_id
+      })
+      event.starts_at = facebook_payload["start_time"]
+      event.graph_payload = facebook_payload
+      event
+    end
+  end
+end

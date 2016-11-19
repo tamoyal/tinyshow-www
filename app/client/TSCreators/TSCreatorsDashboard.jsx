@@ -19,12 +19,6 @@ class TSCreatorsDashboard extends React.Component {
     TSData.currentUser = user;
     this.setState({currentUser: user});
   }
-  componentDidMount() {
-    // I don't think this works, maybe FB is not initted yet? but it should be!
-    // FB.Event.subscribe('auth.logout', response => {
-    //   this.props.router.replace('/');
-    // });
-  }
   onAuthError() {
     this.props.router.replace('/');
   }

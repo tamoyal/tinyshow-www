@@ -2,6 +2,8 @@ require_relative "tinyshow/api"
 require_relative "tinyshow/og_meta"
 require_relative "tinyshow/facebook_authable"
 require_relative "tinyshow/facebook_helpers"
+require_relative "tinyshow/event_aggregator"
+require_relative "tinyshow/has_facebook_events"
 
 module TinyShow
 	class << self

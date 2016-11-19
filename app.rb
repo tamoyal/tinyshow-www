@@ -117,6 +117,10 @@ put "/users" do
 	if u
 		user_attrs["confirmed_at"] = Time.now if user_attrs.delete("confirm") == "1"
 		u.update!(user_attrs)
+		
+		if u.get_events_from_user_fb_account && u.events_fetched_at.nil?
+			u.fetch_and_save_facebook_events
+		end
 
 		if params["facebook_pages"]
 			params["facebook_pages"].each do |facebook_id, val|
@@ -125,19 +129,25 @@ put "/users" do
 					page.deactivate if page
 				else
 					facebook_page = JSON.parse(val)
-					page = UserFacebookPage.find_or_initialize_by({
+					page = u.facebook_pages.find_by_facebook_id(facebook_page["id"])
+					page = UserFacebookPage.new({
 						user: u,
 						facebook_id: facebook_page["id"],
-					})
+					}) if page.nil?
 					page.facebook_access_token = facebook_page["access_token"]
 					page.graph_payload = val
 					page.deactivated_at = nil
 					page.save!
+
+					page.fetch_and_save_facebook_events if page.events_fetched_at.nil?						
 				end
 			end
 		end
 
-		respond(200, u.reload.as_json(:include => [:facebook_pages]))
+		respond(200, u.reload.as_json({
+			include: [:facebook_pages],
+			methods: :upcoming_facebook_events_count,
+		}))
 	else
 		respond(404, {error: "User not found"})
 	end
