@@ -156,7 +156,7 @@ end
 # Admin routes, for debugging
 # https://developers.facebook.com/docs/graph-api/reference/event
 
-get '/users/:id/facebook_events' do
+get '/users/:id/facebook_events/giourewbgubgogb2bgiurgbir' do
 	user = User.find(params[:id])
 	begin
 		events = TinyShow::FacebookHelpers.events_for_facebook_id!(
@@ -169,7 +169,7 @@ get '/users/:id/facebook_events' do
 	end
 end
 
-get '/pages/:id/facebook_events' do
+get '/pages/:id/facebook_events/giourewbgubgogb2bgiurgbir' do
 	page = UserFacebookPage.find(params[:id])
 	begin
 		events = TinyShow::FacebookHelpers.events_for_facebook_id!(
