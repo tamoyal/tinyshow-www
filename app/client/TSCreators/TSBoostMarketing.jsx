@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
-var TSHelpers = require('../../TSHelpers.js');
-var TSStyle = require('../../TSStyle.js');
+import TSHelpers from '../TSHelpers.js';
+import TSStyle from '../TSStyle.js';
 
 class TSBoostMarketing extends React.Component {
   render() {

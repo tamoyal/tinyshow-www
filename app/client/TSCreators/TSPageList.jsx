@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-var TSVerticalCenter = require('../components/TSVerticalCenter.jsx');
+import TSVerticalCenter from '../components/TSVerticalCenter.jsx';
 
 class TSPageList extends React.Component {
   renderImage(page) {

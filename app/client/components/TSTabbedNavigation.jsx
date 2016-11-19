@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-var TSNavLink = require('../components/TSNavLink.jsx');
+import TSNavLink from './TSNavLink.jsx';
 
 class TSTabbedNavigation extends React.Component {
   constructor(props) {

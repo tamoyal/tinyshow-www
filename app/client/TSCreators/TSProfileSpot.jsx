@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
-var TSVerticalCenter = require('../components/TSVerticalCenter.jsx');
-var TSStyle = require('../../TSStyle.js');
+import TSVerticalCenter from '../components/TSVerticalCenter.jsx';
+import TSStyle from '../TSStyle.js';
 
 class ProfileIconFacebook extends React.Component {
   render() {

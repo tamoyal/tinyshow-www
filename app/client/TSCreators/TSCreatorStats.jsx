@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-var TSProfileSpot = require('./TSProfileSpot.jsx');
+import TSProfileSpot from './TSProfileSpot.jsx';
 
 class TSCreatorStats extends React.Component {
   render() {

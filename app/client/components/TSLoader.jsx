@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
-import TSHelpers from '../../TSHelpers.js';
+
+import TSHelpers from '../TSHelpers.js';
 
 class TSLoader extends React.Component {
   render() {

@@ -1,10 +1,11 @@
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
-var TSProgressButton = require('../components/TSProgressButton.jsx');
-var TSFormResult = require('../components/TSFormResult.jsx');
-var TSStyle = require('../../TSStyle.js');
-var TinyShowApi = require('../../TinyShowApi.js');
+import TSUser from '../models/TSUser.js';
+import TSApi from '../api/TSApi.js';
+import TSProgressButton from '../components/TSProgressButton.jsx';
+import TSFormResult from '../components/TSFormResult.jsx';
+import TSStyle from '../TSStyle.js';
 
 class TSCreatorAccountForm extends React.Component {
   constructor(props) {
@@ -25,11 +26,11 @@ class TSCreatorAccountForm extends React.Component {
   onSubmit(e) {
     this.setState({saving: true, success: null, error: null});
     e.preventDefault();
-    TinyShowApi.updateUser(
+    TSApi.updateUser(
       $(ReactDOM.findDOMNode(this.refs.accountForm)).serialize(),
       (response) => {
         this.setState({saving: false, success: 1});
-        this.props.onSettingsSaved(new TinyShowUser(response));
+        this.props.onSettingsSaved(new TSUser(response));
       },
       (xhr) => {
         console.log(xhr);

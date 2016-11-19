@@ -1,12 +1,12 @@
 import React, {Component} from 'react';
 
-var TSCreatorStats = require('./TSCreatorStats.jsx');
-var TSCreatorAccountForm = require('./TSCreatorAccountForm.jsx');
-var TSCreatorEventSourcesForm = require('./TSCreatorEventSourcesForm.jsx');
-var TSTabbedNavigation = require('../components/TSTabbedNavigation.jsx');
-var TSData = require('../../TSData.js');
-var TSTopNavBar = require('../components/TSTopNavBar.jsx');
-var TSBoostBranding = require('./TSBoostBranding.jsx');
+import TSCreatorStats from './TSCreatorStats.jsx';
+import TSCreatorAccountForm from './TSCreatorAccountForm.jsx';
+import TSCreatorEventSourcesForm from './TSCreatorEventSourcesForm.jsx';
+import TSTabbedNavigation from '../components/TSTabbedNavigation.jsx';
+import TSData from '../TSData.js';
+import TSTopNavBar from '../components/TSTopNavBar.jsx';
+import TSBoostBranding from './TSBoostBranding.jsx';
 
 class TSCreatorsDashboard extends React.Component {
   constructor(props) {

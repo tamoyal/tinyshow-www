@@ -4,7 +4,7 @@ import { Router, Route, hashHistory } from 'react-router';
 
 var TSCreators = require('./TSCreators/TSCreators.jsx');
 var TSCreatorsDashboard = require('./TSCreators/TSCreatorsDashboard.jsx');
-var TSData = require('../TSData.js');
+var TSData = require('./TSData.js');
 
 function requireAuth(nextState, replace) {
   if (!TSData.currentUser) {

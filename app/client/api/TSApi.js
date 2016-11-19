@@ -1,4 +1,4 @@
-var TinyShowApi = {
+var TSApi = {
   login: (onSuccess, onError) => {
     var auth = FB.getAuthResponse();
     var now = new Date();
@@ -36,4 +36,4 @@ var TinyShowApi = {
   },
 };
 
-module.exports = TinyShowApi;
+module.exports = TSApi;

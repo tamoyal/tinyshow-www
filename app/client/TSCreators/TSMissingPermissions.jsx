@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 
-var TSIconButton = require('../components/TSIconButton.jsx');
-var TSWell = require('../components/TSWell.jsx');
+import TSIconButton from '../components/TSIconButton.jsx';
+import TSWell from '../components/TSWell.jsx';
 
 class TSMissingPermissions extends React.Component {
   constructor(props) {

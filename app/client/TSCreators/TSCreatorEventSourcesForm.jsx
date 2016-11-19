@@ -1,13 +1,15 @@
+
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
 
-var TSStyle = require('../../TSStyle.js');
-var TSFacebookHelpers = require('../../TSFacebookHelpers.js');
-var TSPageList = require('./TSPageList.jsx');
-var TSVerticalCenter = require('../components/TSVerticalCenter.jsx');
-var TSFormResult = require('../components/TSFormResult.jsx');
-var TSProgressButton = require('../components/TSProgressButton.jsx');
-var TinyShowApi = require('../../TinyShowApi.js');
+import TSUser from '../models/TSUser.js';
+import TSApi from '../api/TSApi.js';
+import TSStyle from '../TSStyle.js';
+import TSFacebookHelpers from '../TSFacebookHelpers.js';
+import TSPageList from './TSPageList.jsx';
+import TSVerticalCenter from '../components/TSVerticalCenter.jsx';
+import TSFormResult from '../components/TSFormResult.jsx';
+import TSProgressButton from '../components/TSProgressButton.jsx';
 
 class TSCreatorEventSourcesForm extends React.Component {
   constructor(props) {
@@ -26,11 +28,11 @@ class TSCreatorEventSourcesForm extends React.Component {
   onSubmit(e) {
     this.setState({saving: true, success: null, error: null});
     e.preventDefault();
-    TinyShowApi.updateUser(
+    TSApi.updateUser(
       $(ReactDOM.findDOMNode(this.refs.eventSourcesForm)).serialize(),
       (response) => {
         this.setState({saving: false, success: 1});
-        this.props.onSettingsSaved(new TinyShowUser(response));
+        this.props.onSettingsSaved(new TSUser(response));
       },
       (xhr) => {
         console.log(xhr);

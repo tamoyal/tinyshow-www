@@ -1,15 +1,16 @@
 import React, {Component} from 'react';
 
-var TSFacebookLogin = require('./TSFacebookLogin.jsx');
-var TSMissingPermissions = require('./TSMissingPermissions.jsx');
-var TSTopNavBar = require('../components/TSTopNavBar.jsx');
-var TSLoader = require('../components/TSLoader.jsx');
-var TSBoostBranding = require('./TSBoostBranding.jsx');
-var TSFacebookHelpers = require('../../TSFacebookHelpers.js');
-var TSUserRegistration = require('./TSUserRegistration.jsx');
-var TSBoostMarketing = require('./TSBoostMarketing.jsx');
-var TSData = require('../../TSData.js');
-var TinyShowApi = require('../../TinyShowApi.js');
+import TSUser from '../models/TSUser.js';
+import TSApi from '../api/TSApi.js';
+import TSFacebookHelpers from '../TSFacebookHelpers.js';
+import TSData from '../TSData.js';
+import TSTopNavBar from '../components/TSTopNavBar.jsx';
+import TSLoader from '../components/TSLoader.jsx';
+import TSFacebookLogin from './TSFacebookLogin.jsx';
+import TSMissingPermissions from './TSMissingPermissions.jsx';
+import TSBoostBranding from './TSBoostBranding.jsx';
+import TSUserRegistration from './TSUserRegistration.jsx';
+import TSBoostMarketing from './TSBoostMarketing.jsx';
 
 class TSCreators extends React.Component {
   constructor(props) {
@@ -69,9 +70,9 @@ class TSCreators extends React.Component {
   }
   login() {
     this.setState({loading: true});
-    TinyShowApi.login(
+    TSApi.login(
       (user) => {
-        TSData.currentUser = new TinyShowUser(user);
+        TSData.currentUser = new TSUser(user);
         this.checkPermissions();
       },
       (error) => {

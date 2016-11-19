@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
 
-var TSCreatorAccountForm = require('./TSCreatorAccountForm.jsx');
-var TSCreatorEventSourcesForm = require('./TSCreatorEventSourcesForm.jsx');
-var TSStyle = require('../../TSStyle.js');
-var TSData = require('../../TSData.js');
-var TSWell = require('../components/TSWell.jsx');
+import TSCreatorAccountForm from './TSCreatorAccountForm.jsx';
+import TSCreatorEventSourcesForm from './TSCreatorEventSourcesForm.jsx';
+import TSStyle from '../TSStyle.js';
+import TSData from '../TSData.js';
+import TSWell from '../components/TSWell.jsx';
 
 class TSUserRegistration extends React.Component {
   constructor(props) {

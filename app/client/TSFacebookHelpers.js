@@ -1,3 +1,5 @@
+var TSFacebookPage = require('./models/TSFacebookPage.js');
+
 var TSFacebookHelpers = {
   getPagesList: (facebookId, onSuccess, onError) => {
     FB.api('/' + facebookId + '/accounts', (response) => {
@@ -5,7 +7,7 @@ var TSFacebookHelpers = {
         TSFacebookHelpers.handleError(response, onError);
       } else {
         var facebookPages = response.data.map((pageJSON) => {
-          return new FacebookPage(pageJSON);
+          return new TSFacebookPage(pageJSON);
         });
         onSuccess(facebookPages);
       }

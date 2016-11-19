@@ -1,9 +1,10 @@
 import React, {Component} from 'react';
+
 import styles from './TSFormResult.css';
+import TSStyle from '../TSStyle.js';
 
 var classNames = require('classnames');
 var ReactCSSTransitionGroup = require('react-addons-css-transition-group');
-var TSStyle = require('../../TSStyle.js');
 
 class TSHappyFace extends React.Component {
   render() {

@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
+
 import styles from './TSNavLink.css';
+
 var classNames = require('classnames');
 
 class TSNavLink extends React.Component {

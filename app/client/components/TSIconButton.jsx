@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 
-var TSStyle = require('../../TSStyle.js');
+import TSStyle from '../TSStyle.js';
 
 class TSIconButton extends React.Component {
   render() {

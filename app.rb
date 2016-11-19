@@ -74,7 +74,6 @@ get '/local_data' do
 end
 
 get '/creators' do
-	@required_creator_permissions = REQUIRED_CREATOR_FB_PERMISSIONS
 	erb :login
 end
 
@@ -125,7 +124,6 @@ put "/users" do
 						user: u,
 						facebook_id: facebook_page["id"],
 					})
-					page.facebook_id = facebook_page["id"]
 					page.facebook_access_token = facebook_page["access_token"]
 					page.graph_payload = val
 					page.deactivated_at = nil

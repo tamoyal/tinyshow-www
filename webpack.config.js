@@ -1,5 +1,5 @@
 module.exports = {
-  entry: './app/react/Application.jsx',
+  entry: './app/client/Application.jsx',
   output: {
     path: __dirname,
     filename: './public/app.js'
