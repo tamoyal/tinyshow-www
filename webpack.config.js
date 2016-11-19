@@ -18,7 +18,7 @@ module.exports = {
         query: {
           presets: ['react', 'es2015']
         },
-        test: /\.jsx$/,
+        test: /\.js(x?)$/,
         exclude: /(node_modules|bower_components)/
       },
       {
@@ -34,4 +34,5 @@ module.exports = {
       }
     ]
   },
+  plugins: [],
 };
