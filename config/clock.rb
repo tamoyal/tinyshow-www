@@ -1,3 +1,5 @@
+# IMPORTANT: We're not using clock procs now because we don't need 100%
+# reliability and it's cheaper to use the scheduler
 $:.unshift File.dirname(__FILE__) + "/.."
 
 require "bundler"
