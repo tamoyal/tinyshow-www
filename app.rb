@@ -1,25 +1,28 @@
 $:.unshift File.dirname(__FILE__)
 
-require 'config/host'
-require 'config/facebook'
-require 'lib/tinyshow'
-require 'json'
-require 'typhoeus'
-require 'uri'
-require 'sinatra'
-require 'sinatra/activerecord'
-require 'awesome_print'
-require 'app/models/user'
-require 'app/models/user_facebook_page'
-require 'app/models/facebook_event'
-require 'koala'
+require "json"
+require "typhoeus"
+require "uri"
+require "sinatra"
+require "sinatra/activerecord"
+require "awesome_print"
+require "koala"
 
-Tilt.register Tilt::ERBTemplate, 'html.erb'
+require "config/dotenv_loader"
+require "config/host"
+require "config/facebook"
+require "config/google_maps"
+require "lib/tinyshow"
+require "app/models/user"
+require "app/models/user_facebook_page"
+require "app/models/facebook_event"
+
+Tilt.register Tilt::ERBTemplate, "html.erb"
 
 Koala::Utils.level = Logger::DEBUG
 
 configure do
-	set :views, File.dirname(__FILE__) + '/app/views'
+	set :views, File.dirname(__FILE__) + "/app/views"
 	set :domain, Host.get
 	set :iphone_app_store_link, "https://itunes.apple.com/app/tinyshow/id1079542002"
 end
@@ -42,6 +45,16 @@ helpers do
     status code
     body.to_json
   end
+
+  def facebook_authenticate
+  	TinyShow::FacebookHelpers.get_me(params[:facebook_access_token]).tap do |me|
+  		halt 400 unless me["id"] == params[:facebook_id] 
+  	end
+  end
+
+  def send_to_raven(ex, user, extra_context=nil)
+  	TinyShow.send_to_raven(ex, user, request, extra_context)
+	end
 end
 
 before do
@@ -79,35 +92,47 @@ get '/creators' do
 end
 
 post "/login" do
-	graph = Koala::Facebook::API.new(params[:facebook_access_token])
-	me = graph.get_object("me?fields=#{FACEBOOK_USER_FIELDS.join(",")}")
+	me = facebook_authenticate
+	u = User.find_by_facebook_id(me["id"]) ||
+		User.create!({
+			facebook_id: params[:facebook_id],
+			facebook_access_token: params[:facebook_access_token],
+			facebook_access_token_expiration: params[:facebook_access_token_expiration],
+			email: me["email"],
+			first_name: me["first_name"],
+			last_name: me["last_name"],
+			facebook_graph_payload: me,
+		})
 
-	if me["id"] == params[:facebook_id]
-		u = User.find_by_facebook_id(me["id"]) ||
-			User.new({
-				facebook_id: me["id"],
-				facebook_access_token: params[:facebook_access_token],
-				facebook_access_token_expiration: params[:facebook_access_token_expiration],
-				facebook_graph_payload: me,
-				email: me["email"],
-				first_name: me["first_name"],
-				last_name: me["last_name"],
-			})
-		error = u.extend_access_token
-		if error.nil?
-			u.save!
-			u.update_pages
-			respond(200, u.as_json({
-				include: [:facebook_pages],
-				methods: :upcoming_facebook_events_count,
-			}))
-		else
-			TinyShow.error "TinyShow Login: Could not get long lived access token for #{me["id"]}"
-			respond(400, {})
-		end
-	else
-		respond(400, {})
+	begin
+		u.extend_access_token
+	rescue Koala::Facebook::OAuthTokenRequestError => ex
+	  send_to_raven(ex, u)
+		TinyShow.error({
+			name: "Koala::Facebook::OAuthTokenRequestError",
+			ex: ex,
+			context: {
+				user_id: u.id,
+				facebook_access_token: u.facebook_access_token,
+			}
+		})
+		halt 400, "Bad facebook credentials"
+	rescue Koala::Facebook::ServerError => ex
+		send_to_raven(ex, u)
+		TinyShow.error({name: "Koala::Facebook::ServerError", ex: ex})
+		halt 500, "Server error"
+	rescue Koala::KoalaError => ex
+		send_to_raven(ex, u)
+		TinyShow.error({name: "Koala::KoalaError", ex: ex})
+  	halt 503, "Unknown error"
 	end
+
+	u.save!
+	u.update_pages
+	respond(200, u.as_json({
+		include: [:facebook_pages],
+		methods: :upcoming_facebook_events_count,
+	}))
 end
 
 put "/users" do
@@ -117,7 +142,7 @@ put "/users" do
 	if u
 		user_attrs["confirmed_at"] = Time.now if user_attrs.delete("confirm") == "1"
 		u.update!(user_attrs)
-		
+
 		if u.get_events_from_user_fb_account && u.events_fetched_at.nil?
 			u.fetch_and_save_facebook_events
 		end
@@ -129,16 +154,12 @@ put "/users" do
 					page.deactivate if page
 				else
 					facebook_page = JSON.parse(val)
-					page = u.facebook_pages.find_by_facebook_id(facebook_page["id"])
-					page = UserFacebookPage.new({
-						user: u,
-						facebook_id: facebook_page["id"],
-					}) if page.nil?
-					page.facebook_access_token = facebook_page["access_token"]
-					page.graph_payload = val
-					page.deactivated_at = nil
-					page.save!
-
+					page = u.facebook_pages.find_by_facebook_id(facebook_page["id"]) ||
+						UserFacebookPage.new({
+							user: u,
+							facebook_id: facebook_page["id"],
+						})
+					page.update_from_facebook_payload(facebook_page)
 					page.fetch_and_save_facebook_events if page.events_fetched_at.nil?						
 				end
 			end
@@ -174,7 +195,7 @@ end
 get '/users/:id/facebook_events/giourewbgubgogb2bgiurgbir' do
 	user = User.find(params[:id])
 	begin
-		events = TinyShow::FacebookHelpers.events_for_facebook_id!(
+		events = TinyShow::FacebookHelpers.events_for_facebook_id(
 			user.facebook_id,
 	    user.facebook_access_token,
 		)
@@ -187,7 +208,7 @@ end
 get '/pages/:id/facebook_events/giourewbgubgogb2bgiurgbir' do
 	page = UserFacebookPage.find(params[:id])
 	begin
-		events = TinyShow::FacebookHelpers.events_for_facebook_id!(
+		events = TinyShow::FacebookHelpers.events_for_facebook_id(
 			page.facebook_id,
 	    page.facebook_access_token,
 		)

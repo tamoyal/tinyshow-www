@@ -4,7 +4,7 @@ class User < ActiveRecord::Base
 
 	has_many :facebook_pages,
     -> { where deactivated_at: nil },
-    class_name: 'UserFacebookPage'
+    class_name: "UserFacebookPage"
 
   validates_uniqueness_of :facebook_id
   validates_uniqueness_of :email, unless: Proc.new { |u| u.confirmed_at.nil? }
@@ -23,17 +23,10 @@ class User < ActiveRecord::Base
   end
 
   def update_pages
-    graph = Koala::Facebook::API.new(facebook_access_token)
-    accounts = graph.get_connections(facebook_id, "accounts")
+    accounts = TinyShow::FacebookHelpers.get_accounts(facebook_id, facebook_access_token)
     facebook_pages.each do |page|
       account = accounts.detect { |a| a["id"] == page.facebook_id }
-      if account
-        page.facebook_access_token = account["access_token"]
-        page.graph_payload = account
-        page.save!
-      else
-        page.deactivate
-      end
+      account ? page.update_from_facebook_payload(account) : page.deactivate
     end
   end
 

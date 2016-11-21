@@ -8,12 +8,15 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/css/bootstrap.min.css" integrity="sha384-AysaV+vQoT3kOAXZkl02PThvDr8HYKPZhNT5h/CXfBThSRXQ6jW5DO2ekP5ViFdi" crossorigin="anonymous">
   <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <script src="https://cdn.ravenjs.com/3.8.1/raven.min.js" crossorigin="anonymous"></script>
+
   <link rel="stylesheet" type="text/css" href="/css/connect.css">
   <link rel="stylesheet" type="text/css" href="/css/bootstrap-social.css">
   <link rel="stylesheet" type="text/css" href="/css/loaders.min.css">
 
   <!-- Constants -->
   <script type="text/javascript">
+    Raven.config('https://1f45ac293d5f4af59be1950f00103376@sentry.io/116317').install();
     var REQUIRED_CREATOR_PERMISSIONS = <%= REQUIRED_CREATOR_FB_PERMISSIONS %>;
   </script>
 </head>

@@ -39,6 +39,8 @@ GEM
     rack-protection (1.5.3)
       rack
     rake (11.3.0)
+    sentry-raven (2.1.4)
+      faraday (>= 0.7.6, < 0.10.x)
     sinatra (1.4.7)
       rack (~> 1.5)
       rack-protection (~> 1.4)
@@ -64,6 +66,7 @@ DEPENDENCIES
   pg
   puma
   rake
+  sentry-raven
   sinatra
   sinatra-activerecord
   typhoeus
