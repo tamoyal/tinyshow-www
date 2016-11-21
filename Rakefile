@@ -8,13 +8,15 @@ namespace :db do
   end
 end
 
-task :get_facebook_events do
-  require "app"
-  require "app/workers/aggregate_worker"
+namespace :work do
+  task :get_facebook_events do
+    require "app"
+    require "app/workers/aggregate_worker"
 
-  TinyShow.log_mode = :clock
-  TinyShow.info "Running get_facebook_events, at #{Time.now}"
-  w = AggregateWorker.new
-  w.perform
-  TinyShow.info "Finished get_facebook_events at #{Time.now}"
+    TinyShow.log_mode = :clock
+    TinyShow.info "Running get_facebook_events, at #{Time.now}"
+    w = AggregateWorker.new
+    w.perform
+    TinyShow.info "Finished get_facebook_events at #{Time.now}"
+  end
 end
