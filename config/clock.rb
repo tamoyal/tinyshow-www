@@ -6,8 +6,7 @@ Bundler.require(:default)
 require "app/workers/aggregate_worker"
 
 module Clockwork
-  #, :at => '06:00', :tz => 'EST'
-  every(5.minutes, 'get_facebook_events') do
+  every(1.day, 'get_facebook_events', :at => '06:00', :tz => 'EST') do
     TinyShow.log_mode = :clock
     TinyShow.info "Running get_facebook_events, at #{Time.now}"
     w = AggregateWorker.new
