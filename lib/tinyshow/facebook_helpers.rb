@@ -1,7 +1,9 @@
 module TinyShow
   class FacebookHelpers
     def self.events_for_facebook_id(facebook_id, token)
-      graph(token).get_connections(facebook_id, "events")
+      events = graph(token).get_connections(facebook_id, "events")
+      last_year = Time.now.year - 1
+      events.reject { |e| Time.parse(e["start_time"]).year < last_year }
     end
 
     def self.get_me(token)
