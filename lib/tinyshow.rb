@@ -7,6 +7,16 @@ require_relative "tinyshow/has_facebook_events"
 
 module TinyShow
 	class << self
+		@@log_mode = :app
+
+		def log_mode=(mode)
+      @@log_mode = mode
+    end
+
+    def log_mode
+      @@log_mode
+    end
+
 		def send_to_raven(ex, user, request=nil, extra_context=nil)
 			if user
 				ctx = {id: user.id, email: user.email}
@@ -19,24 +29,37 @@ module TinyShow
 		end
 
 		def debug(obj, level=:debug)
+			prefix = 	if log_mode == :clock
+									"TinyShow#Clock"
+								else
+									"TinyShow"
+								end
 			if obj.is_a?(String)
 				if level == :warn
-					puts "[TinyShow WARN] #{obj}".orange
+					puts "[#{prefix} WARN] #{obj}".orange
 				elsif level == :error
-					puts "[TinyShow ERROR] #{obj}".red
+					puts "[#{prefix} ERROR] #{obj}".red
+				elsif level == :info
+					puts "[#{prefix} INFO] #{obj}".white
 				else
-					puts "[TinyShow DEBUG] #{obj}"
+					puts "[#{prefix} DEBUG] #{obj}"
 				end
 			else
 				if level == :warn
-					puts "[TinyShow WARN]".orange
+					puts "[#{prefix} WARN]".orange
 				elsif level == :error
-					puts "[TinyShow ERROR]".red
+					puts "[#{prefix} ERROR]".red
+				elsif level == :info
+					puts "[#{prefix} INFO]".white
 				else
-					puts "[TinyShow DEBUG]"
+					puts "[#{prefix} DEBUG]"
 				end
 				ap obj
 			end
+		end
+
+		def info(obj)
+			debug(obj, :info)
 		end
 
 		def warn(obj)

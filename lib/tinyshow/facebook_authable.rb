@@ -5,9 +5,9 @@ module TinyShow
     # re-login.
     def extend_access_token
       new_access_info = FacebookHelpers.extend_access_token(facebook_access_token)
-      TinyShow.debug new_access_info
       self.facebook_access_token = new_access_info["access_token"]
       self.facebook_access_token_expiration = Time.now.utc + new_access_info["expires"].to_i
+      TinyShow.info "Access token extended" if new_access_info["access_token"]
     end
   end
 end
