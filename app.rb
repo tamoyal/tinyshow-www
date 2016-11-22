@@ -196,26 +196,12 @@ end
 
 get '/users/:id/facebook_events/giourewbgubgogb2bgiurgbir' do
 	user = User.find(params[:id])
-	begin
-		events = TinyShow::FacebookHelpers.events_for_facebook_id(
-			user.facebook_id,
-	    user.facebook_access_token,
-		)
-		respond(200, events)
-	rescue Koala::Facebook::APIError => e
-		respond(422, {})
-	end
+	events = TinyShow::EventAggregator.facebook_events(user)
+	respond(200, events)
 end
 
 get '/pages/:id/facebook_events/giourewbgubgogb2bgiurgbir' do
 	page = UserFacebookPage.find(params[:id])
-	begin
-		events = TinyShow::FacebookHelpers.events_for_facebook_id(
-			page.facebook_id,
-	    page.facebook_access_token,
-		)
-		respond(200, events)
-	rescue Koala::Facebook::APIError => e
-		respond(422, {})
-	end
+	events = TinyShow::EventAggregator.facebook_events(page)
+	respond(200, events)
 end
