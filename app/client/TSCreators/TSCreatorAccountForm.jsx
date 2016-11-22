@@ -14,14 +14,28 @@ class TSCreatorAccountForm extends React.Component {
       saving: false,
       success: null,
       error: null,
-      data: {
-        firstName: this.props.user.firstName,
-        lastName: this.props.user.lastName,
-        email: this.props.user.email,
-        phone: this.props.user.phone,
-      },
+      firstName: props.user.firstName,
+      lastName: props.user.lastName,
+      phone: props.user.phone,
+      email: props.user.email,
     };
     this.onSubmit = this.onSubmit.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+  }
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      firstName: nextProps.user.firstName,
+      lastName: nextProps.user.lastName,
+      phone: nextProps.user.phone,
+      email: nextProps.user.email,
+    });
+  }
+  errorMessageFromResponse(responseText) {
+    var errors = JSON.parse(responseText);
+    // First error for now
+    var k = Object.keys(errors)[0];
+    var v = errors[k][0];
+    return k + " " + v;
   }
   onSubmit(e) {
     this.setState({saving: true, success: null, error: null});
@@ -29,19 +43,28 @@ class TSCreatorAccountForm extends React.Component {
     TSApi.updateUser(
       $(ReactDOM.findDOMNode(this.refs.accountForm)).serialize(),
       (response) => {
+        var u = new TSUser(response);
         this.setState({saving: false, success: 1});
-        this.props.onSettingsSaved(new TSUser(response));
+        this.props.onSettingsSaved(u);
       },
       (xhr) => {
-        console.log(xhr);
-        var error;
+        var errorMessage;
         if (xhr.status >= 500) {
-          error = "Something unexpected went wrong, we're looking into it.";
+          errorMessage = "Something unexpected went wrong, we're looking into it.";
         } else {
-          error = xhr.statusText;
+          if (xhr.responseText.length > 0) {
+            errorMessage = this.errorMessageFromResponse(xhr.responseText);
+          } else {
+            errorMessage = xhr.statusText;
+          }
         }
-        this.setState({saving: false, error: error});
+        this.setState({saving: false, error: errorMessage});
       });
+  }
+  handleChange(e) {
+    var change = {};
+    change[e.target.id] = e.target.value;
+    this.setState(change);
   }
   render() {
     return (
@@ -66,7 +89,8 @@ class TSCreatorAccountForm extends React.Component {
           <input
             id="firstName"
             name="user[first_name]"
-            defaultValue={this.state.data.firstName}
+            value={this.state.firstName}
+            onChange={this.handleChange}
             type="text"
             className="form-control"
             placeholder="First Name" />
@@ -77,7 +101,8 @@ class TSCreatorAccountForm extends React.Component {
           <input
             id="lastName"
             name="user[last_name]"
-            defaultValue={this.state.data.lastName}
+            value={this.state.lastName}
+            onChange={this.handleChange}
             type="text"
             className="form-control"
             placeholder="Last Name" />
@@ -88,7 +113,8 @@ class TSCreatorAccountForm extends React.Component {
           <input
             id="email"
             name="user[email]"
-            defaultValue={this.state.data.email}
+            value={this.state.email}
+            onChange={this.handleChange}
             type="email"
             className="form-control"
             aria-describedby="emailHelp"
@@ -103,7 +129,8 @@ class TSCreatorAccountForm extends React.Component {
           <input
             id="phone"
             name="user[phone]"
-            defaultValue={this.state.data.phone}
+            value={this.state.phone}
+            onChange={this.handleChange}
             type="phone"
             className="form-control"
             aria-describedby="phoneHelp"

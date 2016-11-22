@@ -93,8 +93,9 @@ end
 
 post "/login" do
 	me = facebook_authenticate
-	u = User.find_by_facebook_id(me["id"]) ||
-		User.create!({
+	u = User.find_by_facebook_id(me["id"])
+	if !u
+		u = User.new({
 			facebook_id: params[:facebook_id],
 			facebook_access_token: params[:facebook_access_token],
 			facebook_access_token_expiration: params[:facebook_access_token_expiration],
@@ -103,27 +104,25 @@ post "/login" do
 			last_name: me["last_name"],
 			facebook_graph_payload: me,
 		})
+		u.save!(validate: false)
+	end
 
 	begin
 		u.extend_access_token
 	rescue Koala::Facebook::OAuthTokenRequestError => ex
 	  send_to_raven(ex, u)
-		TinyShow.error({
-			name: "Koala::Facebook::OAuthTokenRequestError",
-			ex: ex,
-			context: {
-				user_id: u.id,
-				facebook_access_token: u.facebook_access_token,
-			}
+		TinyShow.exception(ex, {
+			user_id: u.id,
+			facebook_access_token: u.facebook_access_token,
 		})
 		halt 400, "Bad facebook credentials"
 	rescue Koala::Facebook::ServerError => ex
 		send_to_raven(ex, u)
-		TinyShow.error({name: "Koala::Facebook::ServerError", ex: ex})
+		TinyShow.exception(ex)
 		halt 500, "Server error"
 	rescue Koala::KoalaError => ex
 		send_to_raven(ex, u)
-		TinyShow.error({name: "Koala::KoalaError", ex: ex})
+		TinyShow.exception(ex)
   	halt 503, "Unknown error"
 	end
 
@@ -141,7 +140,10 @@ put "/users" do
 	u = User.includes(:facebook_pages).find_by_facebook_access_token(t)
 	if u
 		user_attrs["confirmed_at"] = Time.now if user_attrs.delete("confirm") == "1"
-		u.update!(user_attrs)
+
+		if !u.update(user_attrs)
+			halt 422, u.errors.to_json
+		end
 
 		if u.get_events_from_user_fb_account && u.events_fetched_at.nil?
 			u.fetch_and_save_facebook_events

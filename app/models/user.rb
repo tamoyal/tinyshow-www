@@ -8,10 +8,22 @@ class User < ActiveRecord::Base
 
   validates_uniqueness_of :facebook_id
   validates_uniqueness_of :email, unless: Proc.new { |u| u.confirmed_at.nil? }
+  validates :first_name, presence: true, allow_blank: false
+  validates :last_name, presence: true, allow_blank: false
+  validates_format_of :email, :with => /\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/
+  validates :phone,
+    allow_blank: true,
+    numericality: true,
+    length: {minimum: 10, maximum: 15}
 
   before_save :nil_if_blank
 
 	NULL_ATTRS = %w(first_name last_name email phone)
+
+  def phone=(num)
+    num.gsub!(/\D/, "") if num.is_a?(String)
+    super(num)
+  end
 
   def upcoming_facebook_events_count
     upcoming_facebook_events.count

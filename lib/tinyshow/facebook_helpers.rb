@@ -1,11 +1,13 @@
 module TinyShow
   class FacebookHelpers
+    # Note: You can't query for events after start time using the graph API
+    # so we gotta do some ugly stuff
     def self.events_for_facebook_id(facebook_id, token)
       keep_going = true
       events = []
       last_year = Time.now.year - 1
-      res = graph(token).get_connections(facebook_id, "events")
 
+      res = graph(token).get_connections(facebook_id, "events")
       while res
         res.each do |e|
           if Time.parse(e["start_time"]).year < last_year
@@ -15,7 +17,6 @@ module TinyShow
             events << e
           end
         end
-
         break unless keep_going
         res = res.next_page
       end

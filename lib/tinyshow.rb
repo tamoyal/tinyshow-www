@@ -67,8 +67,17 @@ module TinyShow
 		end
 
 		def error(obj)
-			# TODO: log these in a DB or something
 			debug(obj, :error)
+		end
+
+		def exception(ex, context=nil)
+			hsh = {
+				name: "#{ex.class}",
+				message: ex.message,
+				ex: ex,
+			}
+			hsh[:context] = context if context
+			debug(hsh, :error)
 		end
 	end
 end
