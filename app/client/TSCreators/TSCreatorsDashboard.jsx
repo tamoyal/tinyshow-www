@@ -7,6 +7,7 @@ import TSTabbedNavigation from '../components/TSTabbedNavigation.jsx';
 import TSData from '../TSData.js';
 import TSTopNavBar from '../components/TSTopNavBar.jsx';
 import TSBoostBranding from './TSBoostBranding.jsx';
+import TSHelp from '../components/TSHelp.jsx';
 
 class TSCreatorsDashboard extends React.Component {
   constructor(props) {
@@ -49,6 +50,8 @@ class TSCreatorsDashboard extends React.Component {
               onSettingsSaved={this.onUserUpdated}
               onAuthError={this.onAuthError}
             />
+
+            <TSHelp title="Help" />
           </TSTabbedNavigation>
         </div>
       </div>

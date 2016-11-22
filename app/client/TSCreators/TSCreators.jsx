@@ -11,6 +11,7 @@ import TSMissingPermissions from './TSMissingPermissions.jsx';
 import TSBoostBranding from './TSBoostBranding.jsx';
 import TSUserRegistration from './TSUserRegistration.jsx';
 import TSBoostMarketing from './TSBoostMarketing.jsx';
+import TSHelp from '../components/TSHelp.jsx';
 
 class TSCreators extends React.Component {
   constructor(props) {
@@ -134,11 +135,15 @@ class TSCreators extends React.Component {
             <TSLoader style={{marginTop: 60}} />
           }
 
-          <div style={{marginTop: 40, marginBottom: 40}}>
+          <div style={{marginTop: 40, marginBottom: 60}}>
             {this.state.currentUser ? 
               this.renderFacebookAuthenticatedUser() :
               this.renderUnauthenticated()}
           </div>
+
+          {!this.state.loading &&
+            <TSHelp />
+          }
         </div>
       </div>
     )
