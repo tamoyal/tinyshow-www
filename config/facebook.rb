@@ -19,5 +19,5 @@ REQUIRED_CREATOR_FB_PERMISSIONS = [
   "pages_show_list",
   "manage_pages",
   "user_events",
-  "rsvp_event",
+#  "rsvp_event",
 ]
