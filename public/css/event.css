@@ -8,32 +8,14 @@ body {
 #main_content {
 	padding-left: 40px;
 	font-size: 14px;
-/*	text-align: center;
-*/}
-.huge-font {
-	font-size: 48px;
-}
-.big-font {
-	font-size: 24px;
-}
-.pink {
-	color: #FF0089;
-}
-.green {
-	color: #00F0B5;
 }
 .fb-share-button {
 	margin-top: 28px;
-}
-.artist-details {
-	margin-top: 20px;
 }
 #main_content img{
 	margin-top: 20px;
 	margin-bottom: 20px;
 	width: 400px;
-/*	padding-left: 60px;
-	padding-right: 60px;*/
 }
 .top-banner {
 	background-color: #F2F2F2;
