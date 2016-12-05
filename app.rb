@@ -6,6 +6,7 @@ require "json"
 require "typhoeus"
 require "uri"
 require "sinatra"
+require "sinatra/reloader" if development?
 require "sinatra/activerecord"
 require "awesome_print"
 require "koala"
@@ -18,8 +19,7 @@ require "lib/tinyshow"
 require "app/models/user"
 require "app/models/user_facebook_page"
 require "app/models/facebook_event"
-
-puts ENV.inspect
+require "app/presenters/event_presenter"
 
 Tilt.register Tilt::ERBTemplate, "html.erb"
 
@@ -81,9 +81,14 @@ get '/dl' do
 end
 
 get '/s/:id' do
+	@settings = {
+		iphone_app_store_link: settings.iphone_app_store_link,
+		google_maps_api_key: ENV["GOOGLE_MAPS_API_KEY"],
+	}.to_json
 	api = TinyShow::Api.new
-	@event = api.show(params[:id])
-	@og = TinyShow::OGMeta.new(@event, settings.domain)
+	event = api.show(params[:id])
+	@e = EventPresenter.new(event)
+	@og = TinyShow::OGMeta.new(event, settings.domain)
 	erb :show
 end
 

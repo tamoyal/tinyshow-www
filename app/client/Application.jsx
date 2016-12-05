@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Router, Route, hashHistory } from 'react-router';
 
 var TSCreators = require('./TSCreators/TSCreators.jsx');
+var TSConsumers = require('./TSConsumers/TSConsumers.jsx');
 var TSCreatorsDashboard = require('./TSCreators/TSCreatorsDashboard.jsx');
 var TSData = require('./TSData.js');
 
@@ -16,6 +17,8 @@ function requireAuth(nextState, replace) {
 }
 
 var login = document.getElementById('tiny_show_connect');
+var show = document.getElementById('tiny_show');
+
 if (login) {
   ReactDOM.render(
     <Router history={hashHistory}>
@@ -28,4 +31,15 @@ if (login) {
       </Route>
     </Router>,
   login);
+} else if (show) {
+  ReactDOM.render(
+    <Router history={hashHistory}>
+      <Route
+        path="/"
+        component={
+          () => (<TSConsumers event={event} og={og} settings={settings} />)
+        }>
+      </Route>
+    </Router>,
+  show);
 }
