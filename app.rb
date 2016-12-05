@@ -1,5 +1,7 @@
 $:.unshift File.dirname(__FILE__)
 
+ENV["RACK_ENV"] ||= "development"
+
 require "json"
 require "typhoeus"
 require "uri"
@@ -16,6 +18,8 @@ require "lib/tinyshow"
 require "app/models/user"
 require "app/models/user_facebook_page"
 require "app/models/facebook_event"
+
+puts ENV.inspect
 
 Tilt.register Tilt::ERBTemplate, "html.erb"
 
