@@ -3,7 +3,7 @@ TinyShowz on the webz, yo
 ### Development
 - This project requires webpack so you must have that installed
 - Then you must run `npm install` to install all the required components
-- After changing React code, you must recompile to webpack's output file
+- After changing React code, you must recompile to webpack's output file with `webpack`
 
 ### Deployment
 1. You must have the node builpack even though this is a Ruby app - `heroku buildpacks:add --index 1 heroku/nodejs`. This is because we need the webpack postinstall script to run so it bundles a production version of our JS.

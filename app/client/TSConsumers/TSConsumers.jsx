@@ -1,4 +1,6 @@
 import React, {Component} from 'react';
+import TSStyle from '../TSStyle.js';
+import TSTag from '../components/TSTag.jsx';
 
 class TSConsumers extends React.Component {
 	render() {
@@ -18,22 +20,28 @@ class TSConsumers extends React.Component {
 						size="large"
 					/>
 
-					<div className="artist-details">
-						<div className="huge-font">{this.props.event.title}</div>
+					<div style={{marginTop: 20, marginBottom: 20}}>
 						<div
-							className="big-font"
-							style={{marginTop: 6}}>
-							@{this.props.event.event.venue.name}
+							style={{
+								fontSize: 48,
+								fontFamily: "HelveticaNeue-Thin",
+							}}>
+							{this.props.event.title}
 						</div>
-						<div className="big-font green" style={{marginTop: 2}}>
-							{this.props.event.genres}
+						<div
+							style={{
+								fontSize: 16,
+								fontFamily: "HelveticaNeue-Light",
+								marginBottom: 10,
+							}}>
+							{this.props.event.formatted_start_time}
 						</div>
-					</div>
 
-					<div className="big-font start-time">
-						<i className="fa fa-arrow-right" aria-hidden="true"></i>
-						{this.props.event.formatted_start_time}
-						<i className="fa fa-arrow-left" aria-hidden="true"></i>
+						{this.props.event.genres.map((g, k) => {
+	            return (
+	              <TSTag key={k} title={g} />
+	            )
+	          })}
 					</div>
 
 					<iframe

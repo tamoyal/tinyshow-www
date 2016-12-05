@@ -15,6 +15,6 @@ class EventPresenter
 			address_lines[1]
 		@formatted_start_time = Time.parse(event["event"]["starts_at"]).
 			strftime("%A %m/%d at %l:%M%p")
-		@genres = @event["artist"]["genres"].join(',').upcase
+		@genres = @event["artist"]["genres"]
 	end
 end
