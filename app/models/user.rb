@@ -1,33 +1,31 @@
-class User < ActiveRecord::Base
+class User < ApplicationRecord
   include TinyShow::FacebookAuthable
   include TinyShow::HasFacebookEvents
 
-	has_many :facebook_pages,
+  has_many :facebook_pages,
     -> { where deactivated_at: nil },
     class_name: "UserFacebookPage"
 
-  validates_uniqueness_of :facebook_id
-  validates_uniqueness_of :email, unless: Proc.new { |u| u.confirmed_at.nil? }
+  validates :facebook_id, uniqueness: true
+  validates :email, uniqueness: { unless: proc { |u| u.confirmed_at.nil? } }
   validates :first_name, presence: true, allow_blank: false
   validates :last_name, presence: true, allow_blank: false
-  validates_format_of :email, :with => /\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/
+  validates :email, format: { with: /\A[^@\s]+@([^@\s]+\.)+[^@\s]+\z/ }
   validates :phone,
     allow_blank: true,
     numericality: true,
-    length: {minimum: 10, maximum: 15}
+    length: { minimum: 10, maximum: 15 }
 
   before_save :nil_if_blank
 
-	NULL_ATTRS = %w(first_name last_name email phone)
+  NULL_ATTRS = %w[first_name last_name email phone]
 
   def phone=(num)
     num.gsub!(/\D/, "") if num.is_a?(String)
     super(num)
   end
 
-  def upcoming_facebook_events_count
-    upcoming_facebook_events.count
-  end
+  delegate :count, to: :upcoming_facebook_events, prefix: true
 
   def upcoming_facebook_events
     my_facebook_ids = facebook_pages.pluck(:facebook_id) << facebook_id

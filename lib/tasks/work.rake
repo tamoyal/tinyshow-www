@@ -1,6 +1,6 @@
-desc 'Aggregate events from TinyShow artists facebook user accounts and facebook pages'
+desc "Aggregate events from TinyShow artists facebook user accounts and facebook pages"
 namespace :work do
-  task :get_facebook_events do
+  task get_facebook_events: :environment do
     require "app"
     require "app/workers/aggregate_worker"
 

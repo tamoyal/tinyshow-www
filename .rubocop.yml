@@ -1,0 +1,93 @@
+require:
+  - standard
+  - rubocop-rails
+  - rubocop-rspec
+
+inherit_gem:
+  standard: config/base.yml
+
+AllCops:
+  NewCops: enable
+  Exclude:
+    - node_modules/**/*
+    - public/**/*
+    - vendor/**/*
+
+Rails:
+  Enabled: true # enable rubocop-rails cops
+Rails/TimeZone:
+  Enabled: false
+Rails/Date:
+  Enabled: false
+RSpec:
+  Enabled: true # enable rubocop-rspec cops
+RSpec/DescribeClass:
+  Enabled: false # ignore missing comments on classes
+RSpec/ExampleLength:
+  Enabled: false
+RSpec/InstanceVariable:
+  Enabled: false
+RSpec/MultipleExpectations:
+  Enabled: false
+RSpec/ExampleWording:
+  Enabled: false
+RSpec/DescribedClass:
+  Enabled: false
+Bundler/DuplicatedGem:
+  Enabled: false # ignore duplicate
+
+Metrics/MethodLength:
+  Max: 40
+Metrics/AbcSize:
+  Max: 30
+Metrics/BlockLength:
+  IgnoredMethods: ["describe", "it", "context", "configure", "register", "draw"]
+Layout/HashAlignment:
+  EnforcedHashRocketStyle: key
+  EnforcedColonStyle: key
+  EnforcedLastArgumentHashStyle: ignore_implicit
+  SupportedLastArgumentHashStyles:
+    - always_inspect
+    - always_ignore
+    - ignore_implicit
+    - ignore_explicit
+Layout/FirstHashElementIndentation:
+  EnforcedStyle: consistent
+  SupportedStyles:
+    - special_inside_parentheses
+    - consistent
+    - align_braces
+  IndentationWidth:
+Layout/MultilineHashBraceLayout:
+  EnforcedStyle: symmetrical
+  SupportedStyles:
+    - symmetrical
+    - new_line
+    - same_line
+Layout/SpaceInsideHashLiteralBraces:
+  EnforcedStyle: space
+  EnforcedStyleForEmptyBraces: no_space
+  SupportedStyles:
+    - space
+    - no_space
+    - compact
+Lint/ParenthesesAsGroupedExpression:
+  Enabled: true
+Lint/AmbiguousOperatorPrecedence:
+  Enabled: true
+Style/Documentation:
+  Enabled: false
+Style/ClassAndModuleChildren:
+  Enabled: false
+Style/GuardClause:
+  Enabled: false
+Style/IfUnlessModifier:
+  Enabled: false
+Layout/LineLength:
+  Max: 120
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+Layout/MultilineAssignmentLayout:
+  EnforcedStyle: same_line
+Layout/EndAlignment:
+  EnforcedStyleAlignWith: variable

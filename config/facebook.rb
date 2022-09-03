@@ -10,7 +10,7 @@ FACEBOOK_USER_FIELDS = [
   "interested_in",
   "locale",
   "location",
-  "relationship_status",
+  "relationship_status"
 ]
 
 REQUIRED_CREATOR_FB_PERMISSIONS = [
@@ -18,6 +18,6 @@ REQUIRED_CREATOR_FB_PERMISSIONS = [
   "email",
   "pages_show_list",
   "manage_pages",
-  "user_events",
-#  "rsvp_event",
+  "user_events"
+  #  "rsvp_event",
 ]

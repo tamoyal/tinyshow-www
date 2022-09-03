@@ -1,0 +1,1 @@
+rubocop -A $(git diff --name-only --cached | grep -e ".rb$" | tr '\n' ' ')
